@@ -1,0 +1,69 @@
+New log file opened at Sat Aug 20 19:50:31 IST 2016 by 36449@C02PVUM4G8WP.local
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sbt server socket logs are in: /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/.sbtserver/connections/master.log))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sbt client logs are in: /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/.sbtserver/connections/activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6.log))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sbt general server logs are in: /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/.sbtserver/master.log))
+Reading next message from client.
+Got request: ListenToEvents()
+Reading next message from client.
+Got request: ListenToBuildChange()
+Reading next message from client.
+Got request: SendSyntheticBuildChanged()
+Reading next message from client.
+Got request: KeyLookupRequest(discoveredMainClasses)
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: (3,ReceivedResponse())
+Reading next message from client.
+Got request: KeyLookupRequest(mainClass)
+Reading next message from client.
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,> initialize))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,> onFailure load-failed))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,> boot))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,> reload))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,[Loading] Scanning directory /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,[Loading] Found non-root projects ))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,[Loading] Done in /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project, returning: ()))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,deducing auto plugins based on known facts Set(Atom(sbt.plugins.CorePlugin)) and clauses Clauses(List(Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.plugins.JUnitXmlReportPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.CorePlugin),Set(Atom(sbt.plugins.IvyPlugin))), Clause(Atom(sbt.plugins.IvyPlugin),Set(Atom(sbt.plugins.JvmPlugin))), Clause(Atom(sbt.plugins.JvmPlugin),Set(Atom(sbt.plugins.JUnitXmlReportPlugin)))))))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: deduced result: Matched(sbt.plugins.CorePlugin,sbt.plugins.IvyPlugin,sbt.plugins.JvmPlugin,sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sorting: ns: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: sorting:: found: List(sbt.plugins.CorePlugin) not found List(sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: sorting:: found: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin) not found List(sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: sorting:: found: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin) not found List(sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: sorting:: found: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin) not found List()))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,  :: sorted deduced result: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,[Loading] Done in /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project, returning: (backend-play-activator-java-build)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(info,Loading project definition from /Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,Running task... Cancel: sbt.TaskCancellationStrategy$Null$@3c14f4da, check cycles: false))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogStdOut([info] Updating {file:/Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project/}backend-play-activator-java-build...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(info,Updating {file:/Users/sabyasachi.upadhyay/workspace/backend-play-activator-java/project/}backend-play-activator-java-build...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,Other repositories:))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,Default repositories:))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,Using inline dependencies specified in Scala.))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,:: resolving dependencies :: default#backend-play-activator-java-build;0.1-SNAPSHOT))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	confs: [compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool]))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	validate = true))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	refresh = false))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,resolving dependencies for configuration 'compile'))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,== resolving dependencies for default#backend-play-activator-java-build;0.1-SNAPSHOT [compile]))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,== resolving dependencies default#backend-play-activator-java-build;0.1-SNAPSHOT->com.typesafe.play#sbt-fork-run-plugin;2.5.5 [compile->default(compile)]))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogStdOut([info] Resolving com.typesafe.play#sbt-fork-run-plugin;2.5.5 ...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(info,Resolving com.typesafe.play#sbt-fork-run-plugin;2.5.5 ...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sbt-chain: Checking cache for: dependency: com.typesafe.play#sbt-fork-run-plugin;2.5.5 {compile=[default(compile)]}))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogStdOut([A[2K[info] Resolving com.typesafe.play#sbt-fork-run-plugin;2.5.5 ...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(info,Resolving com.typesafe.play#sbt-fork-run-plugin;2.5.5 ...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,sbt-chain-delegate: Checking cache for: dependency: com.typesafe.play#sbt-fork-run-plugin;2.5.5 {compile=[default(compile)]}))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,		tried https://repo.typesafe.com/typesafe/ivy-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,CLIENT ERROR: Not Found url=https://repo.typesafe.com/typesafe/ivy-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	typesafe-ivy-releases: no ivy file found for com.typesafe.play#sbt-fork-run-plugin;2.5.5))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,		tried https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	sbt-plugin-releases: found md file for com.typesafe.play#sbt-fork-run-plugin;2.5.5))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,		=> https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml (2.5.5)))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,downloading https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml ...))
+Sending msg to client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6: DetachedLogEvent(LogMessage(debug,	sbt-plugin-releases: downloading https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/com.typesafe.play/sbt-fork-run-plugin/scala_2.10/sbt_0.13/2.5.5/ivys/ivy.xml))
+Got request: UnlistenToEvents()
+Reading next message from client.
+Got request: UnlistenToBuildChange()
+Reading next message from client.
+Client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6 EOF, shutting down.
+Stopping client.
+Dropping message (8,ReceivedResponse()) to dead client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6
+Dropping message (0,ReceivedResponse()) to dead client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6
+Client activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6 thread exiting.

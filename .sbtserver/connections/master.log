@@ -1,0 +1,25 @@
+New log file opened at Sat Aug 20 19:50:31 IST 2016 by 36449@C02PVUM4G8WP.local
+Taking next connection to: 65170
+New client attempting to connect on port: 65171-65170
+  Address = /192.168.0.189:65170
+This client on port 65171 has uuid ef62bb33-3a96-4183-a4a8-4c30edaa5204 configName activator humanReadableName Activator protocolVersion 3 featureTags Vector()
+Connected Clients: activator-ef62bb33-3a96-4183-a4a8-4c30edaa5204
+Taking next connection to: 65170
+New client attempting to connect on port: 65172-65170
+  Address = /192.168.0.189:65170
+Handshake exception on socket: 65172
+sbt.impl.ipc.HandshakeException: Unable to perform handshake
+	at sbt.impl.ipc.Peer.handshake(IPC.scala:46)
+	at sbt.impl.ipc.MultiClientServer.<init>(IPC.scala:150)
+	at sbt.server.SbtServerSocketHandler$$anon$1.run(SbtServerSocketHandler.scala:43)
+Caused by: java.io.EOFException
+	at java.io.DataInputStream.readInt(DataInputStream.java:392)
+	at sbt.impl.ipc.Peer.receive(IPC.scala:95)
+	at sbt.impl.ipc.Peer.handshake(IPC.scala:49)
+	... 2 more
+Taking next connection to: 65170
+New client attempting to connect on port: 65173-65170
+  Address = /192.168.0.189:65170
+This client on port 65173 has uuid aee5722f-3dc8-43cf-9a77-6c181353e0a6 configName activator humanReadableName Activator protocolVersion 3 featureTags Vector()
+Connected Clients: activator-ef62bb33-3a96-4183-a4a8-4c30edaa5204, activator-aee5722f-3dc8-43cf-9a77-6c181353e0a6
+Taking next connection to: 65170
