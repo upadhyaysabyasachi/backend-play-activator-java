@@ -21,10 +21,18 @@ public class HomeController extends Controller {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result getSomething(){
-        JsonNode request = request().body().asJson();
-        String object = request.get("username").toString();
-        return ok(object);
+    public Result storeFBCredentials() {
+        JsonNode request = request().body().asJson();  JsonNode fbDetails = request().body().asJson();
+
+        String email = fbDetails.get("email").toString();
+        String age = fbDetails.get("age").toString();
+        String gender = fbDetails.get("sex").toString();
+        String firstName = fbDetails.get("firstName").toString();
+        String lastName = fbDetails.get("lastname").toString();
+
+
+        return ok("200");
+        
     }
 
 }
