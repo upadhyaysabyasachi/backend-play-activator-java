@@ -25,10 +25,13 @@ public class HomeController extends Controller {
         JsonNode request = request().body().asJson();  JsonNode fbDetails = request().body().asJson();
 
         String email = fbDetails.get("email").toString();
-        String age = fbDetails.get("age").toString();
+        String dob = fbDetails.get("dob").toString();
         String gender = fbDetails.get("sex").toString();
         String firstName = fbDetails.get("firstName").toString();
         String lastName = fbDetails.get("lastname").toString();
+
+
+
 
 
         return ok("200");
