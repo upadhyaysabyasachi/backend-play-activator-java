@@ -24,8 +24,20 @@ import play.db.*;
  */
 public class UserProfileInsertActor  extends UntypedActor {
 
+
+
+    public String insertQueryBuilder(FBUser   user){
+
+        return "INSERT INTO user_profile values("+user.fbemail+","+user.altemail+","+
+                user.sex+","+user.dob+","+user.firstName+","+user.lastName+")";
+
+    }
+
+
     @Override
     public void onReceive(Object message) throws Throwable {
+
+        System.out.println("inside the actor on receive");
 
         if (!(message instanceof FBUser)) {
 
@@ -37,12 +49,11 @@ public class UserProfileInsertActor  extends UntypedActor {
                 if (conn != null) {
                     System.out.println("Connection successful!");
                     Statement stmt = conn.createStatement();
+                    System.out.println("query is " + insertQueryBuilder(user));
+                    int a = stmt.executeUpdate(insertQueryBuilder(user)); // do something with the connection.
 
-                    ResultSet rs = stmt.executeQuery("INSERT INTO user_profile values('"+user.fbemail+"','"+user.altemail+"','"+
-                    user.sex+"','"+user.dob+"','"+user.firstName+"','"+user.lastName); // do something with the connection.
-                    while (rs.next()) {
-                        System.out.println(rs.getString(1)); // should print out "1"'
-                    }
+                        getSender().tell(a, self());
+
                 }
 
             } catch (SQLException e) {

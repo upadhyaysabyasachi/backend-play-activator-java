@@ -8,12 +8,20 @@ import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import models.FBUser;
 import play.libs.Akka;
+import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
+import scala.compat.java8.FutureConverters;
 import views.html.index;
+import akka.actor.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.CompletionStage;
+import play.libs.F;
+import play.libs.F.Promise;
+
+import static akka.pattern.Patterns.ask;
 
 /**
  * Created by sabyasachi.upadhyay on 21/08/16.
@@ -27,26 +35,23 @@ public class FBLoginController extends Controller {
      * <code>GET</code> request with a path of <code>/</code>.
      */
 
-    static{
-        BoneCPConfig config = new BoneCPConfig();
-        BoneCP connectionPool = null;
-        try {
-            connectionPool = new BoneCP(config);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try {
-            Connection conn = connectionPool.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+
+    static ActorSystem actorSystem = ActorSystem.create( "play" );
+
+    static {
+        // Create our local actors
+        actorSystem.actorOf( Props.create( UserProfileInsertActor.class ), "UserProfileInsertActor" );
     }
 
     public Result index() {
         return ok(index.render("Your new application is ready."));
     }
 
-    public Result storeFBCredentials() {
+    public CompletionStage<Result> storeFBCredentials() {
+
+        ActorSelection userProfileInsertActorInstance =
+                actorSystem.actorSelection( "/user/UserProfileInsertActor" );
         JsonNode request = request().body().asJson();
         JsonNode fbDetails = request().body().asJson();
         String fbemail = fbDetails.get("fb_email").toString();
@@ -54,15 +59,17 @@ public class FBLoginController extends Controller {
         String dob = fbDetails.get("dob").toString();
         String gender = fbDetails.get("sex").toString();
         String firstName = fbDetails.get("firstName").toString();
-        String lastName = fbDetails.get("lastname").toString();
+        String lastName = fbDetails.get("lastName").toString();
 
-        ActorRef userProfileInsertActor = Akka.system().actorOf(
-                Props.create(UserProfileInsertActor.class).withDispatcher("mkmk"));
 
-        userProfileInsertActor.tell(new FBUser(fbemail,alternativeemail,dob,gender,firstName,lastName), userProfileInsertActor);
+        return FutureConverters.toJava(ask(userProfileInsertActorInstance, new FBUser(fbemail,alternativeemail,dob,gender,firstName,lastName),100000))
+                .thenApply(response -> ok((String) response));
+        //userProfileInsertActor.tell(new FBUser(fbemail,alternativeemail,dob,gender,firstName,lastName), userProfileInsertActor);
 
-        return ok("200");
+        //return ok("200");
 
     }
+
+
 
 }

@@ -4,7 +4,8 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
-POST    /duh                        controllers.HomeController.getSomething
+POST    /duh                        controllers.HomeController.storeFBCredentials
+POST    /fblogin                    controllers.FBLoginController.storeFBCredentials
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
 # An example controller showing how to write asynchronous code
