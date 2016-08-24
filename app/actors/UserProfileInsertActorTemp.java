@@ -12,6 +12,7 @@ import java.sql.*;
 
 import models.DBConnectionPool;
 import models.FBUser;
+import models.tempFBUser;
 import play.Play.*;
 import play.mvc.*;
 import play.db.*;
@@ -19,12 +20,12 @@ import play.db.*;
 /**
  * Created by sabyasachi.upadhyay on 21/08/16.
  */
-public class UserProfileInsertActor  extends UntypedActor {
+public class UserProfileInsertActorTemp  extends UntypedActor {
 
-    public String insertQueryBuilder(FBUser   user){
+    public String insertQueryBuilder(tempFBUser user){
 
-        return "INSERT INTO user_profiles(fb_email,gender,DOB,fullName,fb_id, preferred_categories) values("+user.fbemail+","+
-                user.sex+","+user.dob+","+user.fullName+user.fb_id+","+user.preferredCategories+")";
+        return "INSERT INTO user_profiles(fb_email,fb_id,fullName,gender) values("+user.fbemail+","+
+                user.fbid+","+user.fullName+","+user.sex+")";
 
     }
 
@@ -35,12 +36,12 @@ public class UserProfileInsertActor  extends UntypedActor {
         System.out.println("inside the actor on receive");
         Connection conn = null;
 
-        if (!(message instanceof FBUser)) {
+        if (!(message instanceof tempFBUser)) {
 
         } else {
             BoneCP pool = DBConnectionPool.getConnectionPool();
             try {
-                FBUser user = (FBUser)message;
+                tempFBUser user = (tempFBUser)message;
                 if (pool != null) {
                     conn = pool.getConnection();
                     if(conn != null){

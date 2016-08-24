@@ -5,20 +5,25 @@ package models;
  */
 public class FBUser {
     public String fbemail = null;
-    public String altemail = null;
+    public String fb_id;
     public String dob;
     public String sex;
-    public String firstName;
-    public String lastName;
+    public String fullName;
+    public String preferredCategories;
 
-    public FBUser(String param1, String param, String param2, String param3, String param4, String param5){
+    public FBUser(String param1, String param, String param2, String param3, String param4, String param5, String param6){
         this.fbemail = param1;
-        this.dob = param2;
-        this.sex = param3;
-        this.firstName = param4;
-        this.lastName = param5;
-        this.altemail = param;
+        this.fb_id = param2;
+        this.dob = param3;
+        this.sex = param4;
+        this.fullName = param5;
+        this.preferredCategories = param6;
     }
+
+
+
+
+
 
 
 }

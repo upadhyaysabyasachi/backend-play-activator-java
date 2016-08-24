@@ -21,26 +21,17 @@ public class DBConnectionPool {
         config.setPassword("trailgunm*123");
         config.setMinConnectionsPerPartition(5);
         config.setMaxConnectionsPerPartition(10);
-        config.setPartitionCount(1);
+        config.setPartitionCount(5);
         try {
             connectionPool = new BoneCP(config);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        try {
-            conn = connectionPool.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
     }
 
-    public static Connection getConnection(){
-        try {
-            Connection conn = connectionPool.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return conn;
+    public static BoneCP getConnectionPool(){
+            return connectionPool;
     }
 
 }

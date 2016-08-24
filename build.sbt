@@ -1,4 +1,4 @@
-name := """backend-play-activator-java"""
+name := "backend-play-activator-java"
 
 version := "1.0-SNAPSHOT"
 
@@ -10,7 +10,8 @@ libraryDependencies ++= Seq(
   javaJdbc,
   cache,
   javaWs,
-  "mysql" % "mysql-connector-java" % "5.1.18"
+  "mysql" % "mysql-connector-java" % "5.1.18",
+  "com.googlecode.json-simple" % "json-simple" % "1.1"
 )
 
 
