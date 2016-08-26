@@ -2,11 +2,13 @@ package controllers;
 
 import actors.UserProfileInsertActor;
 import actors.UserProfileInsertActorTemp;
+import actors.checkIfUserExistsActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
+import models.DBConnectionPool;
 import models.FBUser;
 import models.tempFBUser;
 import play.libs.Akka;
@@ -21,18 +23,21 @@ import views.html.index;
 import akka.actor.*;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
 import play.libs.F;
 import play.libs.F.Promise;
 
 import static akka.pattern.Patterns.ask;
+import filters.CheckForFirstTimeUser;
 
 /**
  * Created by sabyasachi.upadhyay on 21/08/16.
  */
-public class FBLoginController extends Controller {
+public class QuestionPostController extends Controller {
 
     /**
      * An action that renders an HTML page with a welcome message.
@@ -41,13 +46,12 @@ public class FBLoginController extends Controller {
      * <code>GET</code> request with a path of <code>/</code>.
      */
 
-
-
-    static ActorSystem actorSystem = ActorSystem.create( "play" );
+    static ActorSystem actorSystem = ActorSystem.create("play");
 
     static {
         // Create our local actors
-        actorSystem.actorOf( Props.create( UserProfileInsertActorTemp.class ), "UserProfileInsertActorTemp" );
+        actorSystem.actorOf( Props.create( UserProfileInsertActor.class ), "UserProfileInsertActor" );
+        actorSystem.actorOf( Props.create( checkIfUserExistsActor.class ), "checkIfUserExists" );
     }
 
     public Result index() {
@@ -60,36 +64,15 @@ public class FBLoginController extends Controller {
         return jsonobj.toJSONString();
     }
 
+    public CompletionStage<Result> checkUserIfExists(){
 
-    public CompletionStage<Result> storeFBCredentials() {
-
-        ActorSelection userProfileInsertActorInstance =
+        ActorSelection checkifUserExistsActorInstance =
                 actorSystem.actorSelection( "/user/UserProfileInsertActorTemp" );
-        System.out.println("___________________");
-        System.out.println("request body in string as "+request().body().asText());
-        //JsonNode request = request().body().asJson();
         JsonNode fbDetails = request().body().asJson();
-        System.out.println(fbDetails.toString());
-        String fbemail = fbDetails.get("fb_email").toString();
-        //String alternativeemail = fbDetails.get("alternative_email").toString();
-        //String dob = fbDetails.get("dob").toString();
-        String gender = fbDetails.get("sex").toString();
-        //String firstName = fbDetails.get("firstName").toString();
-        //String lastName = fbDetails.get("lastName").toString();
-        String fullName = fbDetails.get("fullName").toString();
-        //String preferredCategories = fbDetails.get("preferredCat").toString();
         String fb_id = fbDetails.get("fb_id").toString();
 
-        //val jsonString = write(jsonClass)
-
-
-
-        return FutureConverters.toJava(ask(userProfileInsertActorInstance, new tempFBUser(fbemail,fb_id,fullName,gender),100000))
-                .thenApply(response -> ok(returnResponse(response)));
-        //userProfileInsertActor.tell(new FBUser(fbemail,alternativeemail,dob,gender,firstName,lastName), userProfileInsertActor);
-
-        //return ok("200");
-
+        return FutureConverters.toJava(ask(checkifUserExistsActorInstance, fb_id,100000))
+                .thenApply(response -> ok(((JSONObject)response).toJSONString()));
     }
 
 

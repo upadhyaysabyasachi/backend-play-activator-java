@@ -11,7 +11,10 @@ import com.jolbox.bonecp.BoneCPConfig;
 import java.sql.*;
 
 import models.DBConnectionPool;
-import models.FBUser;
+//import models.FBUser;
+import models.GenUser;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import play.Play.*;
 import play.mvc.*;
 import play.db.*;
@@ -21,13 +24,18 @@ import play.db.*;
  */
 public class UserProfileInsertActor  extends UntypedActor {
 
-    public String insertQueryBuilder(FBUser   user){
+   public static String updateQueryBuilder(GenUser user){
 
-        return "INSERT INTO user_profiles(fb_email,gender,DOB,fullName,fb_id, preferred_categories) values("+user.fbemail+","+
-                user.sex+","+user.dob+","+user.fullName+user.fb_id+","+user.preferredCategories+")";
+        return "UPDATE user_profiles" +
+                "SET sex = "+user.sex.trim()+","+
+                "dob = " + user.dob.trim() + ","+
+                "preferredCategories = " + user.preferredCategories.trim() + "," +
+                "fullName = " + user.fullName.trim() +
+                " where userid = " + user.uid.trim()+")";
 
     }
 
+    //After first login, insert data and also load the questions
 
     @Override
     public void onReceive(Object message) throws Throwable {
@@ -35,24 +43,29 @@ public class UserProfileInsertActor  extends UntypedActor {
         System.out.println("inside the actor on receive");
         Connection conn = null;
 
-        if (!(message instanceof FBUser)) {
+        if (!(message instanceof GenUser)) {
 
         } else {
             BoneCP pool = DBConnectionPool.getConnectionPool();
             try {
-                FBUser user = (FBUser)message;
+                GenUser user = (GenUser)message;
                 if (pool != null) {
                     conn = pool.getConnection();
                     if(conn != null){
                         System.out.println("Connection successful!");
                         Statement stmt = conn.createStatement();
-                        System.out.println("query is " + insertQueryBuilder(user));
-                        PreparedStatement ps = conn.prepareStatement(insertQueryBuilder(user),
+                        System.out.println("query is " + updateQueryBuilder(user));
+                        PreparedStatement ps = conn.prepareStatement(updateQueryBuilder(user),
                                 Statement.RETURN_GENERATED_KEYS);
                         int a = ps.executeUpdate(); // do something with the connection.
                         ResultSet key = ps.getGeneratedKeys();
                         if (key.next()) {
-                            getSender().tell(key.getInt(1)+"",self());
+                            String userid = key.getInt(1)+"";
+                            JSONArray arr = QuestionPostActor.loadQuestions(userid,conn);
+                            JSONObject jobj = new JSONObject();
+                            jobj.put("userid",userid);
+                            jobj.put("questions",arr);
+                            getSender().tell(jobj.toJSONString(),self());
                         }
 
                     }
