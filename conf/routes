@@ -4,9 +4,9 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.index
-POST    /duh                        controllers.HomeController.storeFBCredentials
-POST    /fblogin                    controllers.MainController.storeFBCredentials
-POST    /usercheck                  controllers.MainController.checkIfUserExists
+
+
+
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
 # An example controller showing how to write asynchronous code
@@ -15,6 +15,7 @@ GET     /message                    controllers.AsyncController.message
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 POST    /postQuestion                           controllers.MainController.postQuestion
-POST    /checkUserIfExists                      controllers.MainController.checkUserIfExists
-POST    /                           controllers.MainController.postQuestion
-POST    /                           controllers.MainController.postQuestion
+POST    /checkUserIfSaberaUserExists            controllers.MainController.checkIfSaberaUserExists
+POST    /checkUserIfFbUserExists                controllers.MainController.checkUserIfFbUserExists
+POST    /register                               controllers.MainController.registerNormalUser
+POST    /storeUserProfile                       controllers.MainController.storeCredentials

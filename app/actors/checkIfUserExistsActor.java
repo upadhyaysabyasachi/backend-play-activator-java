@@ -32,8 +32,8 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
-    public String checkQueryNormalUserBuilder(NormalUser user){
-        return "SELECT userid FROM user_profiles WHERE email = " + user.email+" and password_string like SHA2("+",512) "+"limit 1";
+    public static String  checkQueryNormalUserBuilder(NormalUser user){
+        return "SELECT userid FROM user_profiles WHERE email = " + user.email+" and password_string like SHA2("+user.password+",512) "+"limit 1";
     }
 
     public String insertRegisteredUser(String emailAndPassword){
@@ -41,12 +41,14 @@ public class checkIfUserExistsActor extends UntypedActor {
     }
 
 
-    public JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
+
+
+    public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
         Statement stmt = conn.createStatement();
         //without filters
         JSONArray arr = new JSONArray();
-        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4 from questions join " +
-                " where user not like  '" + uid + "' limit 10");
+        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
+                " where userid <> " + uid + " limit 10");
         while(rs.next()){
             JSONObject obj = new JSONObject();
             obj.put("qstring",rs.getString("qstring"));
@@ -58,12 +60,16 @@ public class checkIfUserExistsActor extends UntypedActor {
             obj.put("option2",rs.getString("option2"));
             obj.put("option3",rs.getString("option3"));
             obj.put("option4",rs.getString("option4"));
+            obj.put("status1",rs.getString("status1"));
+            obj.put("status2",rs.getString("status2"));
+            obj.put("status3",rs.getString("status3"));
+            obj.put("status4",rs.getString("status4"));
+
             arr.add(obj);
         }
 
-        //JSONObject mainObj = new JSONObject();
-        //mainObj.put("questions", arr);
-        conn.close();
+        JSONObject mainObj = new JSONObject();
+        mainObj.put("questions", arr);
         return arr;
 
     }
@@ -82,7 +88,7 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
-    public  JSONObject checkForFirstTimeNormalUser(NormalUser user) throws SQLException {
+    public  static JSONObject checkForFirstTimeNormalUser(NormalUser user) throws SQLException {
         BoneCP pool = DBConnectionPool.getConnectionPool();
         Connection conn = pool.getConnection();
 
@@ -96,12 +102,21 @@ public class checkIfUserExistsActor extends UntypedActor {
             if (numRows > 0) {
                 System.out.println("user exists");
                 while (rs.next()) {
-                    JSONObject jsonobj = new JSONObject();
+                    JSONObject jobj = new JSONObject();
                     String uid = rs.getString("userid");
                     JSONArray questionObj = loadQuestions(uid, conn);
-                    jsonobj.put("status", "exists");
-                    jsonobj.put("questions", questionObj);
-                    return jsonobj;
+                    jobj.put("status", "old");
+                    //jobj.put("questions", questionObj);
+                    JSONObject profileObj =  UserProfileInsertActor.loadProfile(uid,conn);
+                    //JSONObject jobj = new JSONObject();
+                    jobj.put("userid",uid);
+                    jobj.put("questions",questionObj);
+                    jobj.put("sex",profileObj.get("sex"));
+                    jobj.put("dob",profileObj.get("dob"));
+                    jobj.put("email",profileObj.get("email"));
+                    jobj.put("preferred_categories",profileObj.get("preferred_categories"));
+                    jobj.put("fullname",profileObj.get("fullname"));
+                    return jobj;
                 }
             }
 
@@ -122,27 +137,58 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
+    private int getRowCount(ResultSet resultSet) {
+        if (resultSet == null) {
+            return 0;
+        }
+        try {
+            resultSet.last();
+            return resultSet.getRow();
+        } catch (SQLException exp) {
+            exp.printStackTrace();
+        } finally {
+            try {
+                resultSet.beforeFirst();
+            } catch (SQLException exp) {
+                exp.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
 
     public  JSONObject checkForFirstTimeFBUser(String email) throws SQLException{
         BoneCP pool = DBConnectionPool.getConnectionPool();
         Connection conn = pool.getConnection();
 
         if(conn != null){
-            System.out.println("Connection successful!");
+            System.out.println("Connection successful inside checkForFirstTimeFBUser!");
             Statement stmt = conn.createStatement();
             System.out.println("query is " + checkQueryFBUserBuilder(email));
 
             ResultSet rs = stmt.executeQuery(checkQueryFBUserBuilder(email));
             int numRows = rs.getFetchSize();
-            if(numRows > 0){
+            System.out.println("number of rows" + numRows);
+            if(getRowCount(rs)>0){
                 System.out.println("user exists");
                 while(rs.next()){
-                    JSONObject jsonobj = new JSONObject();
+                    JSONObject jobj = new JSONObject();
                     String uid = rs.getString("userid");
+
                     JSONArray questionObj = loadQuestions(uid, conn);
-                    jsonobj.put("status", "exists");
-                    jsonobj.put("questions",questionObj);
-                    return jsonobj;
+                    jobj.put("userid",uid);
+                    jobj.put("status", "old");
+                    jobj.put("questions",questionObj);
+                    JSONObject profileObj =  UserProfileInsertActor.loadProfile(uid,conn);
+                    //JSONObject jobj = new JSONObject();
+                    //jobj.put("userid",uid);
+                    //jobj.put("questions",questions);
+                    jobj.put("sex",profileObj.get("sex"));
+                    jobj.put("dob",profileObj.get("dob"));
+                    jobj.put("email",profileObj.get("email"));
+                    jobj.put("fullname",profileObj.get("fullname"));
+                    jobj.put("preferred_categories",profileObj.get("preferred_categories"));
+                    return jobj;
                 }
             }
             //Insert FB User, generate userid and give it to front end
@@ -158,14 +204,14 @@ public class checkIfUserExistsActor extends UntypedActor {
                 ResultSet key = ps.getGeneratedKeys();
                 if (key.next()) {
                     String userid = key.getInt(1)+"";
-                    JSONArray arr = QuestionPostActor.loadQuestions(userid,conn);
+                    JSONArray arr = loadQuestions(userid,conn);
                     JSONObject jobj = new JSONObject();
                     jobj.put("userid",userid);
-                    jsonobj.put("status","new");
+                    jobj.put("status","new");
                     getSender().tell(jobj.toJSONString(),self());
                 }
 
-                stmt.executeQuery(insertFBUser(email));
+                //stmt.executeQuery(insertFBUser(email));
                 return jsonobj;
 
             }
@@ -221,6 +267,7 @@ public class checkIfUserExistsActor extends UntypedActor {
             }
             //FB USer
             else if (message instanceof String){
+                System.out.println("hellofb user");
                 BoneCP pool = DBConnectionPool.getConnectionPool();
                 try {
 

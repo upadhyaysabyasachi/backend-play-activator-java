@@ -26,13 +26,67 @@ public class UserProfileInsertActor  extends UntypedActor {
 
    public static String updateQueryBuilder(GenUser user){
 
-        return "UPDATE user_profiles" +
+        return "UPDATE user_profiles " +
                 "SET sex = "+user.sex.trim()+","+
                 "dob = " + user.dob.trim() + ","+
-                "preferredCategories = " + user.preferredCategories.trim() + "," +
-                "fullName = " + user.fullName.trim() +
-                " where userid = " + user.uid.trim()+")";
+                "preferred_categories = " + user.preferredCategories.trim() + "," +
+                "fullname = " + user.fullName.trim() +
+                " where userid = " + user.uid.trim().substring(1,user.uid.trim().length()-1);
 
+    }
+
+
+
+    public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
+        Statement stmt = conn.createStatement();
+        //without filters
+        JSONArray arr = new JSONArray();
+        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
+                " where userid <> " + uid + " limit 10");
+        while(rs.next()){
+            JSONObject obj = new JSONObject();
+            obj.put("qstring",rs.getString("qstring"));
+            obj.put("qtypes",rs.getString("qtype"));
+            obj.put("proposed_answer",rs.getString("proposed_answer"));
+            obj.put("hints",rs.getString("hints"));
+            obj.put("timer",rs.getString("timer"));
+            obj.put("option1",rs.getString("option1"));
+            obj.put("option2",rs.getString("option2"));
+            obj.put("option3",rs.getString("option3"));
+            obj.put("option4",rs.getString("option4"));
+            obj.put("status1",rs.getString("status1"));
+            obj.put("status2",rs.getString("status2"));
+            obj.put("status3",rs.getString("status3"));
+            obj.put("status4",rs.getString("status4"));
+
+            arr.add(obj);
+        }
+
+        JSONObject mainObj = new JSONObject();
+        mainObj.put("questions", arr);
+        return arr;
+
+    }
+
+    public static JSONObject loadProfile(String userid, Connection conn) throws  SQLException{
+
+        Statement stmt = conn.createStatement();
+        //without filters
+        JSONObject obj = new JSONObject();
+        System.out.println("select sex, dob, preferred_categories, email, fullname from user_profiles" +
+                " where userid = " + userid);
+        ResultSet rs = stmt.executeQuery("select sex, dob, preferred_categories, email, fullname from user_profiles" +
+                " where userid = " + userid);
+        while(rs.next()){
+            obj.put("sex",rs.getString("sex"));
+            obj.put("dob",rs.getString("dob"));
+            obj.put("preferred_categories",rs.getString("preferred_categories"));
+            obj.put("email",rs.getString("email"));
+            obj.put("fullname",rs.getString("fullname"));
+
+        }
+
+        return obj;
     }
 
     //After first login, insert data and also load the questions
@@ -59,14 +113,17 @@ public class UserProfileInsertActor  extends UntypedActor {
                                 Statement.RETURN_GENERATED_KEYS);
                         int a = ps.executeUpdate(); // do something with the connection.
                         ResultSet key = ps.getGeneratedKeys();
-                        if (key.next()) {
-                            String userid = key.getInt(1)+"";
-                            JSONArray arr = QuestionPostActor.loadQuestions(userid,conn);
+                            System.out.println("userid" + user.uid);
+                            JSONArray questions = loadQuestions(user.uid,conn);
+                            System.out.println("loading questions done");
+                            //JSONObject profileObj =  loadProfile(userid,conn);
+                            //System.out.println("loading profiles  done");
                             JSONObject jobj = new JSONObject();
-                            jobj.put("userid",userid);
-                            jobj.put("questions",arr);
+                            jobj.put("userid",user.uid);
+                            jobj.put("questions",questions);
+                            System.out.println("jsonstring obtained is " + jobj.toJSONString());
                             getSender().tell(jobj.toJSONString(),self());
-                        }
+
 
                     }
 

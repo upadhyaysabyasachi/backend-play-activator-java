@@ -1,7 +1,7 @@
 package controllers;
 
 import actors.UserProfileInsertActor;
-import actors.UserProfileInsertActorTemp;
+//import actors.UserProfileInsertActorTemp;
 import actors.checkIfUserExistsActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import models.DBConnectionPool;
-import models.FBUser;
+//import models.FBUser;
 import models.tempFBUser;
 import play.libs.Akka;
 import play.libs.F;

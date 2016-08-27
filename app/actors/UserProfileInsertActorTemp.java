@@ -1,3 +1,4 @@
+/*
 package actors;
 
 import akka.actor.UntypedActor;
@@ -17,9 +18,11 @@ import play.Play.*;
 import play.mvc.*;
 import play.db.*;
 
+*/
 /**
  * Created by sabyasachi.upadhyay on 21/08/16.
- */
+ *//*
+
 public class UserProfileInsertActorTemp  extends UntypedActor {
 
     public String insertQueryBuilder(tempFBUser user){
@@ -76,3 +79,4 @@ public class UserProfileInsertActorTemp  extends UntypedActor {
         }
     }
 }
+*/

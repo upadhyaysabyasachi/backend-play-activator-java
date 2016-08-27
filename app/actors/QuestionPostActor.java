@@ -24,37 +24,24 @@ public class QuestionPostActor extends UntypedActor {
     }
 
 
-    public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
-        Statement stmt = conn.createStatement();
-        //without filters
-        JSONArray arr = new JSONArray();
-        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4 from questions join " +
-                " where user not like  '" + uid + "' limit 10");
-        while(rs.next()){
-            JSONObject obj = new JSONObject();
-            obj.put("qstring",rs.getString("qstring"));
-            obj.put("qtypes",rs.getString("qtype"));
-            obj.put("proposed_answer",rs.getString("proposed_answer"));
-            obj.put("hints",rs.getString("hints"));
-            obj.put("timer",rs.getString("timer"));
-            obj.put("option1",rs.getString("option1"));
-            obj.put("option2",rs.getString("option2"));
-            obj.put("option3",rs.getString("option3"));
-            obj.put("option4",rs.getString("option4"));
-            arr.add(obj);
-        }
 
-        JSONObject mainObj = new JSONObject();
-        mainObj.put("questions", arr);
-        conn.close();
-        return arr;
-
-    }
 
     public String insertQuestionQueryBuilder(Questions q){
-        return "INSERT INTO questions(userid,qtype,qstring,answer,keywords,option1,option2,option3,option4) " +
-                "values(" + q.userid+","+q.qtype+","+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
-                q.option3+","+q.option4+")";
+
+        if(q.qtype.equalsIgnoreCase("objective")){
+            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
+                    "post_time,category,hints) " +
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    q.option3+","+q.option4+","+q.status1.substring(1,q.status1.length()-1)+","+q.status2.substring(1,q.status2.length()-1)+","+
+                    q.status3.substring(1,q.status3.length()-1)+","+q.status4.substring(1,q.status4.length()-1)+","+q.post_time+","+q.categories+","+q.hints+")";
+        }
+        else{
+            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
+                    "post_time,category) " +
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    q.option3+","+q.option4+","+q.status1+","+q.status2+","+
+                    q.status3+","+q.status4+","+q.post_time+","+q.categories+","+q.hints+")";
+        }
     }
 
     public  JSONObject checkForFirstTimeUser(String fb_id) throws SQLException{
@@ -101,12 +88,12 @@ public class QuestionPostActor extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Throwable {
-        {
 
-            System.out.println("inside the actor on receive");
+
+            System.out.println("inside the actor on receive - Question post actor");
             Connection conn = null;
 
-            if (!(message instanceof String)) {
+            if (!(message instanceof Questions)) {
 
             } else {
                 BoneCP pool = DBConnectionPool.getConnectionPool();
@@ -123,9 +110,14 @@ public class QuestionPostActor extends UntypedActor {
                                 PreparedStatement ps = conn.prepareStatement(insertQuestionQueryBuilder(question),
                                         Statement.RETURN_GENERATED_KEYS);
                                 int a = ps.executeUpdate(); // do something with the connection.
-                                getSender().tell(a,self());
+                                JSONObject jobj = new JSONObject();
+                                jobj.put("status","success");
+                                getSender().tell(jobj.toJSONString(),self());
                             }catch (SQLException se){
                                 se.printStackTrace();
+                                JSONObject jobj = new JSONObject();
+                                jobj.put("status","failure");
+                                getSender().tell(jobj.toJSONString(),self());
                             }
                         }
 
@@ -133,6 +125,7 @@ public class QuestionPostActor extends UntypedActor {
 
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    getSender().tell("failure",self());
                 } finally {
                     if (conn != null) {
                         try {
@@ -146,5 +139,5 @@ public class QuestionPostActor extends UntypedActor {
             }
         }
     }
-}
+
 

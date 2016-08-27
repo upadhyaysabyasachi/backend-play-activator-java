@@ -1,8 +1,10 @@
 package controllers;
 
+import actors.QuestionPostActor;
 import actors.UserProfileInsertActor;
-import actors.UserProfileInsertActorTemp;
+//import actors.UserProfileInsertActorTemp;
 import actors.checkIfUserExistsActor;
+import actors.registerUserActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,8 +52,8 @@ public class MainController extends Controller {
         // Create our local actors
         actorSystem.actorOf( Props.create( UserProfileInsertActor.class ), "UserProfileInsertActor" );
         actorSystem.actorOf( Props.create( checkIfUserExistsActor.class ), "checkIfUserExistsActor" );
-        actorSystem.actorOf( Props.create( checkIfUserExistsActor.class ), "QuestionPostActor" );
-        actorSystem.actorOf( Props.create( checkIfUserExistsActor.class ), "registerUserActor");
+        actorSystem.actorOf( Props.create( QuestionPostActor.class ), "QuestionPostActor" );
+        actorSystem.actorOf( Props.create( registerUserActor.class ), "registerUserActor");
     }
 
     public Result index() {
@@ -74,10 +76,10 @@ public class MainController extends Controller {
         String email = fbDetails.get("email").toString();
 
         return FutureConverters.toJava(ask(checkifUserExistsActorInstance, email,100000))
-                .thenApply(response -> ok(((JSONObject)response).toJSONString()));
+                .thenApply(response -> ok(response.toString()));
     }
 
-    public CompletionStage<Result> checkIfSaberaUserIfExists(){
+    public CompletionStage<Result> checkIfSaberaUserExists(){
 
         ActorSelection checkifUserExistsActorInstance =
                 actorSystem.actorSelection( "/user/checkIfUserExistsActor" );
@@ -86,7 +88,7 @@ public class MainController extends Controller {
         String password = fbDetails.get("password").toString();
 
         return FutureConverters.toJava(ask(checkifUserExistsActorInstance, new NormalUser(email,password),100000))
-                .thenApply(response -> ok(((JSONObject)response).toJSONString()));
+                .thenApply(response -> ok((response.toString())));
     }
 
 
@@ -99,7 +101,7 @@ public class MainController extends Controller {
         String password = fbDetails.get("password").toString();
 
         return FutureConverters.toJava(ask(registerNewUser, new RegisteredUser(email,password),100000))
-                .thenApply(response -> ok(((JSONObject)response).toJSONString()));
+                .thenApply(response -> ok((response.toString())));
     }
 
 
@@ -121,11 +123,11 @@ public class MainController extends Controller {
         System.out.println("___________________");
         System.out.println("request body in string as "+request().body().asText());
         System.out.println(fbDetails.toString());
-        String uid = fbDetails.get("uid").toString();
+        String uid = fbDetails.get("userid").toString();
         String dob = fbDetails.get("dob").toString();
         String gender = fbDetails.get("sex").toString();
-        String fullName = fbDetails.get("fullName").toString();
-        String preferredCategories = fbDetails.get("preferredCat").toString();
+        String fullName = fbDetails.get("fullname").toString();
+        String preferredCategories = fbDetails.get("preferred_categories").toString();
 
         return FutureConverters.toJava(ask(userProfileInsertActorInstance, new GenUser(uid,dob,gender,fullName,preferredCategories),100000))
                 .thenApply(response -> ok(response.toString()));
@@ -142,22 +144,49 @@ public class MainController extends Controller {
         JsonNode questionDetails = request().body().asJson();
         String question = questionDetails.get("question").toString();
         String uid = questionDetails.get("userid").toString();
-        String qtype = questionDetails.get("qtype").toString();
-        String proposed_answer = questionDetails.get("proposed_answer").toString();
-        String keywords = questionDetails.get("keywords").toString();
+        String qtype = questionDetails.get("qtype").toString().substring(1,questionDetails.get("qtype").toString().length()-1);
+        String proposed_answer = null;
+
+        System.out.println("qtype " + qtype);
+        if(qtype.equalsIgnoreCase("subjective")) {
+            proposed_answer = questionDetails.get("proposed_answer").toString();
+            System.out.println("subjective questions " + proposed_answer);
+        }
+
+        //String proposed_answer = questionDetails.get("proposed_answer").toString();
+        String keywords = null;
+        if(qtype.equalsIgnoreCase("subjective")){
+            keywords = questionDetails.get("keywords").toString();
+        }
+
         String hints = questionDetails.get("hints").toString();
         String timer = questionDetails.get("timer").toString();
-        String option1 = "null";
-        String option2 = "null";
-        String option3 = "null";
-        String option4 = "null";
+        String post_time = questionDetails.get("post_time").toString();
+        String categories = questionDetails.get("categories").toString();
+
+        String option1 = null;
+        String option2 = null;
+        String option3 = null;
+        String option4 = null;
+
+        String status1 = null;
+        String status2 = null;
+        String status3 = null;
+        String status4 = null;
+
 
         if(qtype.equalsIgnoreCase("objective")){
             //fetch the options
+            //questionDetails.get("options").iterator()
             option1 = questionDetails.get("option1").toString();
             option2 = questionDetails.get("option2").toString();
             option3 = questionDetails.get("option3").toString();
             option4 = questionDetails.get("option4").toString();
+            //status1 = questionDetails.get("option1").toString();;
+            status1 = questionDetails.get("status1").toString();
+            status2 = questionDetails.get("status2").toString();
+            status3 = questionDetails.get("status3").toString();
+            status4 = questionDetails.get("status4").toString();
         }
         /* this.userid = param1;
         this.qtype = param2;
@@ -170,9 +199,11 @@ public class MainController extends Controller {
         this.option4 = param9;
         */
 
+        System.out.println("proposed answer "+proposed_answer);
+        System.out.println("hints given is " + hints);
         return FutureConverters.toJava(ask(QuestionPostActorInstance, new Questions(uid,qtype,question,proposed_answer,keywords,
-                option1,option2,option3,option4,hints, timer),100000))
-                .thenApply(response -> ok(returnResponse(response)));
+                option1,option2,option3,option4,status1,status2,status3,status4,hints,timer,post_time, categories),100000))
+                .thenApply(response -> ok(response.toString()));
     }
 
 
