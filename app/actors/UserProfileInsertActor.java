@@ -35,13 +35,11 @@ public class UserProfileInsertActor  extends UntypedActor {
 
     }
 
-
-
     public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
         Statement stmt = conn.createStatement();
         //without filters
         JSONArray arr = new JSONArray();
-        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
+        ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
                 " where userid <> " + uid + " limit 10");
         while(rs.next()){
             JSONObject obj = new JSONObject();
@@ -58,7 +56,9 @@ public class UserProfileInsertActor  extends UntypedActor {
             obj.put("status2",rs.getString("status2"));
             obj.put("status3",rs.getString("status3"));
             obj.put("status4",rs.getString("status4"));
-
+            obj.put("uid",rs.getString("userid"));
+            obj.put("qid",rs.getString("qid"));
+            obj.put("proposed_keywords",rs.getString("proposed_keywords"));
             arr.add(obj);
         }
 

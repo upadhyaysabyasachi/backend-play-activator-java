@@ -1,16 +1,15 @@
 package controllers;
 
-import actors.QuestionPostActor;
-import actors.UserProfileInsertActor;
+import actors.*;
 //import actors.UserProfileInsertActorTemp;
-import actors.checkIfUserExistsActor;
-import actors.registerUserActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import models.*;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import play.libs.Akka;
 import play.libs.F;
 import play.mvc.Controller;
@@ -54,6 +53,9 @@ public class MainController extends Controller {
         actorSystem.actorOf( Props.create( checkIfUserExistsActor.class ), "checkIfUserExistsActor" );
         actorSystem.actorOf( Props.create( QuestionPostActor.class ), "QuestionPostActor" );
         actorSystem.actorOf( Props.create( registerUserActor.class ), "registerUserActor");
+        actorSystem.actorOf( Props.create( gcmSenderActor.class ), "gcmSenderActor");
+        actorSystem.actorOf( Props.create( registrationTokenUpdateActor.class ), "registrationTokenUpdateActor");
+
     }
 
     public Result index() {
@@ -65,8 +67,6 @@ public class MainController extends Controller {
         jsonobj.put("user_sabera_id", (String) obj);
         return jsonobj.toJSONString();
     }
-
-
 
     public CompletionStage<Result> checkUserIfFbUserExists(){
 
@@ -91,7 +91,6 @@ public class MainController extends Controller {
                 .thenApply(response -> ok((response.toString())));
     }
 
-
     public CompletionStage<Result> registerNormalUser(){
         ActorSelection registerNewUser =
                 actorSystem.actorSelection("/user/registerUserActor");
@@ -103,15 +102,6 @@ public class MainController extends Controller {
         return FutureConverters.toJava(ask(registerNewUser, new RegisteredUser(email,password),100000))
                 .thenApply(response -> ok((response.toString())));
     }
-
-
-    /*public CompletionStage<Result> storeFBCredentials() {
-
-
-
-    }
-*/
-
 
     public CompletionStage<Result> storeCredentials() {
 
@@ -136,10 +126,8 @@ public class MainController extends Controller {
 
     public CompletionStage<Result> postQuestion(){
 
-
         ActorSelection QuestionPostActorInstance =
                 actorSystem.actorSelection( "/user/QuestionPostActor" );
-
 
         JsonNode questionDetails = request().body().asJson();
         String question = questionDetails.get("question").toString();
@@ -205,6 +193,45 @@ public class MainController extends Controller {
                 option1,option2,option3,option4,status1,status2,status3,status4,hints,timer,post_time, categories),100000))
                 .thenApply(response -> ok(response.toString()));
     }
+
+    public CompletionStage<Result> postAnswer(){
+
+        ActorSelection gcmSenderActorInstance =
+                actorSystem.actorSelection( "/user/gcmSenderActor" );
+
+        JsonNode answerDetails = request().body().asJson();
+        String answerString = answerDetails.toString();
+        JSONParser parser = new JSONParser();
+        JSONObject answerObj = new JSONObject();
+        try {
+            answerObj = (JSONObject)parser.parse(answerString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return FutureConverters.toJava(ask(gcmSenderActorInstance, answerObj,100000))
+                .thenApply(response -> ok(response.toString()));
+
+
+    }
+
+    public CompletionStage<Result> updateDeviceToken(){
+
+        ActorSelection gcmSenderActorInstance =
+                actorSystem.actorSelection( "/user/registrationTokenUpdateActor" );
+
+        JsonNode questionDetails = request().body().asJson();
+        String uid = questionDetails.get("uid").toString();
+        String deviceToken = questionDetails.get("device_token").toString();
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+
+        return FutureConverters.toJava(ask(gcmSenderActorInstance, new UserWithDevice(uid,deviceToken),100000))
+                .thenApply(response -> ok(response.toString()));
+
+
+    }
+
 
 
 }

@@ -43,11 +43,11 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
-    public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
+   /* public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
         Statement stmt = conn.createStatement();
         //without filters
         JSONArray arr = new JSONArray();
-        ResultSet rs = stmt.executeQuery("select qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
+        ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
                 " where userid <> " + uid + " limit 10");
         while(rs.next()){
             JSONObject obj = new JSONObject();
@@ -64,15 +64,19 @@ public class checkIfUserExistsActor extends UntypedActor {
             obj.put("status2",rs.getString("status2"));
             obj.put("status3",rs.getString("status3"));
             obj.put("status4",rs.getString("status4"));
-
+            obj.put("uid",rs.getString("userid"));
+            obj.put("qid",rs.getString("qid"));
+            obj.put("proposed_keywords",rs.getString("proposed_keywords"));
             arr.add(obj);
+
+            //arr.add(obj);
         }
 
         JSONObject mainObj = new JSONObject();
         mainObj.put("questions", arr);
         return arr;
 
-    }
+    }*/
 
     /*qid BIGINT NOT NULL AUTO_INCREMENT,
                             userid BIGINT,
@@ -88,56 +92,73 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
-    public  static JSONObject checkForFirstTimeNormalUser(NormalUser user) throws SQLException {
+    public   static JSONObject checkForFirstTimeNormalUser(NormalUser user)  {
         BoneCP pool = DBConnectionPool.getConnectionPool();
-        Connection conn = pool.getConnection();
+        Connection conn = null;
 
-        if (conn != null) {
-            System.out.println("Connection successful!");
-            Statement stmt = conn.createStatement();
-            System.out.println("query is " + checkQueryNormalUserBuilder(user));
+        try {
+            conn = pool.getConnection();
 
-            ResultSet rs = stmt.executeQuery(checkQueryNormalUserBuilder(user));
-            int numRows = rs.getFetchSize();
-            if (numRows > 0) {
-                System.out.println("user exists");
-                while (rs.next()) {
-                    JSONObject jobj = new JSONObject();
-                    String uid = rs.getString("userid");
-                    JSONArray questionObj = loadQuestions(uid, conn);
-                    jobj.put("status", "old");
-                    //jobj.put("questions", questionObj);
-                    JSONObject profileObj =  UserProfileInsertActor.loadProfile(uid,conn);
-                    //JSONObject jobj = new JSONObject();
-                    jobj.put("userid",uid);
-                    jobj.put("questions",questionObj);
-                    jobj.put("sex",profileObj.get("sex"));
-                    jobj.put("dob",profileObj.get("dob"));
-                    jobj.put("email",profileObj.get("email"));
-                    jobj.put("preferred_categories",profileObj.get("preferred_categories"));
-                    jobj.put("fullname",profileObj.get("fullname"));
-                    return jobj;
+            if (conn != null) {
+                System.out.println("Connection successful!");
+                Statement stmt = conn.createStatement();
+                System.out.println("query is " + checkQueryNormalUserBuilder(user));
+
+                ResultSet rs = stmt.executeQuery(checkQueryNormalUserBuilder(user));
+                int numRows = rs.getFetchSize();
+                if (getRowCount(rs) > 0 ) {
+                    System.out.println("user exists");
+                    while (rs.next()) {
+                        JSONObject jobj = new JSONObject();
+                        String uid = rs.getString("userid");
+                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, conn);
+                        jobj.put("status", "old");
+                        //jobj.put("questions", questionObj);
+                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, conn);
+                        //JSONObject jobj = new JSONObject();
+                        jobj.put("userid", uid);
+                        jobj.put("questions", questionObj);
+                        jobj.put("sex", profileObj.get("sex"));
+                        jobj.put("dob", profileObj.get("dob"));
+                        jobj.put("email", profileObj.get("email"));
+                        jobj.put("preferred_categories", profileObj.get("preferred_categories"));
+                        jobj.put("fullname", profileObj.get("fullname"));
+                        return jobj;
+                    }
+                }
+
+                //tell the front end that the normal user is not registered and ask him to register
+                else {
+                    JSONObject jsonobj = new JSONObject();
+                    jsonobj.put("status", "new");
+                    return jsonobj;
+
                 }
             }
+            //for no db connection
+            JSONObject jsonobj = new JSONObject();
+            jsonobj.put("status", "nodbconnection");
+            return jsonobj;
 
-            //tell the front end that the normal user is not registered and ask him to register
-            else {
-                JSONObject jsonobj = new JSONObject();
-                jsonobj.put("status", "new");
-                return jsonobj;
-
+        }catch(SQLException sqe){
+            sqe.printStackTrace();
+        }finally {
+            if(conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        //for no db connection
-        JSONObject jsonobj = new JSONObject();
-        jsonobj.put("status", "nodbconnection");
-        return jsonobj;
+
+        return null;
 
     }
 
 
 
-    private int getRowCount(ResultSet resultSet) {
+    private static int getRowCount(ResultSet resultSet) {
         if (resultSet == null) {
             return 0;
         }
@@ -157,74 +178,88 @@ public class checkIfUserExistsActor extends UntypedActor {
     }
 
 
-    public  JSONObject checkForFirstTimeFBUser(String email) throws SQLException{
+    public  JSONObject checkForFirstTimeFBUser(String email) {
         BoneCP pool = DBConnectionPool.getConnectionPool();
-        Connection conn = pool.getConnection();
+        Connection conn = null;
 
-        if(conn != null){
-            System.out.println("Connection successful inside checkForFirstTimeFBUser!");
-            Statement stmt = conn.createStatement();
-            System.out.println("query is " + checkQueryFBUserBuilder(email));
+        try {
+            conn = pool.getConnection();
 
-            ResultSet rs = stmt.executeQuery(checkQueryFBUserBuilder(email));
-            int numRows = rs.getFetchSize();
-            System.out.println("number of rows" + numRows);
-            if(getRowCount(rs)>0){
-                System.out.println("user exists");
-                while(rs.next()){
-                    JSONObject jobj = new JSONObject();
-                    String uid = rs.getString("userid");
+            if (conn != null) {
+                System.out.println("Connection successful inside checkForFirstTimeFBUser!");
+                Statement stmt = conn.createStatement();
+                System.out.println("query is " + checkQueryFBUserBuilder(email));
 
-                    JSONArray questionObj = loadQuestions(uid, conn);
-                    jobj.put("userid",uid);
-                    jobj.put("status", "old");
-                    jobj.put("questions",questionObj);
-                    JSONObject profileObj =  UserProfileInsertActor.loadProfile(uid,conn);
-                    //JSONObject jobj = new JSONObject();
-                    //jobj.put("userid",uid);
-                    //jobj.put("questions",questions);
-                    jobj.put("sex",profileObj.get("sex"));
-                    jobj.put("dob",profileObj.get("dob"));
-                    jobj.put("email",profileObj.get("email"));
-                    jobj.put("fullname",profileObj.get("fullname"));
-                    jobj.put("preferred_categories",profileObj.get("preferred_categories"));
-                    return jobj;
+                ResultSet rs = stmt.executeQuery(checkQueryFBUserBuilder(email));
+                int numRows = rs.getFetchSize();
+                System.out.println("number of rows" + numRows);
+                if (getRowCount(rs) > 0) {
+                    System.out.println("user exists");
+                    while (rs.next()) {
+                        JSONObject jobj = new JSONObject();
+                        String uid = rs.getString("userid");
+
+                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, conn);
+                        jobj.put("userid", uid);
+                        jobj.put("status", "old");
+                        jobj.put("questions", questionObj);
+                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, conn);
+                        //JSONObject jobj = new JSONObject();
+                        //jobj.put("userid",uid);
+                        //jobj.put("questions",questions);
+                        jobj.put("sex", profileObj.get("sex"));
+                        jobj.put("dob", profileObj.get("dob"));
+                        jobj.put("email", profileObj.get("email"));
+                        jobj.put("fullname", profileObj.get("fullname"));
+                        jobj.put("preferred_categories", profileObj.get("preferred_categories"));
+                        return jobj;
+                    }
+                }
+                //Insert FB User, generate userid and give it to front end
+                else {
+
+                    JSONObject jsonobj = new JSONObject();
+                    //generate the userid and give it too;
+
+                    System.out.println("query is " + insertFBUser(email));
+                    PreparedStatement ps = conn.prepareStatement(insertFBUser(email),
+                            Statement.RETURN_GENERATED_KEYS);
+                    int a = ps.executeUpdate(); // do something with the connection.
+                    ResultSet key = ps.getGeneratedKeys();
+                    if (key.next()) {
+                        String userid = key.getInt(1) + "";
+                        JSONArray arr = UserProfileInsertActor.loadQuestions(userid, conn);
+                        JSONObject jobj = new JSONObject();
+                        jobj.put("userid", userid);
+                        jobj.put("status", "new");
+                        getSender().tell(jobj.toJSONString(), self());
+                    }
+
+                    //stmt.executeQuery(insertFBUser(email));
+                    return jsonobj;
+
                 }
             }
-            //Insert FB User, generate userid and give it to front end
-            else{
 
-                JSONObject jsonobj = new JSONObject();
-                //generate the userid and give it too;
 
-                System.out.println("query is " + insertFBUser(email));
-                PreparedStatement ps = conn.prepareStatement(insertFBUser(email),
-                        Statement.RETURN_GENERATED_KEYS);
-                int a = ps.executeUpdate(); // do something with the connection.
-                ResultSet key = ps.getGeneratedKeys();
-                if (key.next()) {
-                    String userid = key.getInt(1)+"";
-                    JSONArray arr = loadQuestions(userid,conn);
-                    JSONObject jobj = new JSONObject();
-                    jobj.put("userid",userid);
-                    jobj.put("status","new");
-                    getSender().tell(jobj.toJSONString(),self());
+            JSONObject jsonobj = new JSONObject();
+            //jsonobj.put("fb_id", fb_id);
+            jsonobj.put("status", "dbconnectionfail");
+            return jsonobj;
+        }catch (SQLException sqe){
+            sqe.printStackTrace();
+        }finally{
+            if(conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
-
-                //stmt.executeQuery(insertFBUser(email));
-                return jsonobj;
-
             }
         }
 
 
-        JSONObject jsonobj = new JSONObject();
-        //jsonobj.put("fb_id", fb_id);
-        jsonobj.put("status", "dbconnectionfail");
-        return jsonobj;
-
-
-
+        return null;
 
     }
 
@@ -245,7 +280,7 @@ public class checkIfUserExistsActor extends UntypedActor {
                             NormalUser user = (NormalUser) message;
                             try {
                                 getSender().tell(checkForFirstTimeNormalUser(user), self());
-                            } catch (SQLException se) {
+                            } catch (Exception se) {
                                 se.printStackTrace();
                             }
                         }
@@ -277,7 +312,7 @@ public class checkIfUserExistsActor extends UntypedActor {
                             String email = (String)message;
                             try{
                                 getSender().tell(checkForFirstTimeFBUser(email),self());
-                            }catch (SQLException se){
+                            }catch (Exception se){
                                 se.printStackTrace();
                             }
                         }

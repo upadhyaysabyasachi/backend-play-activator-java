@@ -19,7 +19,7 @@ public class DBConnectionPool {
         config.setJdbcUrl("jdbc:mysql://localhost/prod");
         config.setUsername("root");
         config.setPassword("trailgunm*123");
-        config.setMinConnectionsPerPartition(5);
+        config.setMinConnectionsPerPartition(10);
         config.setMaxConnectionsPerPartition(10);
         config.setPartitionCount(5);
         try {

@@ -7,6 +7,9 @@ import models.DBConnectionPool;
 import models.Questions;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import play.api.Environment;
+import play.api.db.ConnectionPool;
+import play.api.db.HikariCPComponents;
 import scala.compat.java8.FutureConverters;
 
 import java.sql.*;
@@ -18,31 +21,6 @@ import static akka.pattern.Patterns.ask;
  */
 public class QuestionPostActor extends UntypedActor {
 
-
-    public String checkQueryBuilder(String fb_id){
-        return "SELECT TOP 1 fb_id FROM user_profiles WHERE fb_id = " + fb_id+" group by fb_id";
-    }
-
-
-
-
-    public String insertQuestionQueryBuilder(Questions q){
-
-        if(q.qtype.equalsIgnoreCase("objective")){
-            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
-                    "post_time,category,hints) " +
-                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
-                    q.option3+","+q.option4+","+q.status1.substring(1,q.status1.length()-1)+","+q.status2.substring(1,q.status2.length()-1)+","+
-                    q.status3.substring(1,q.status3.length()-1)+","+q.status4.substring(1,q.status4.length()-1)+","+q.post_time+","+q.categories+","+q.hints+")";
-        }
-        else{
-            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
-                    "post_time,category) " +
-                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
-                    q.option3+","+q.option4+","+q.status1+","+q.status2+","+
-                    q.status3+","+q.status4+","+q.post_time+","+q.categories+","+q.hints+")";
-        }
-    }
 
     public  JSONObject checkForFirstTimeUser(String fb_id) throws SQLException{
         BoneCP pool = DBConnectionPool.getConnectionPool();
@@ -84,7 +62,6 @@ public class QuestionPostActor extends UntypedActor {
 
 
     }
-
 
     @Override
     public void onReceive(Object message) throws Throwable {
@@ -138,6 +115,34 @@ public class QuestionPostActor extends UntypedActor {
                 }
             }
         }
+
+
+    public String checkQueryBuilder(String fb_id){
+        return "SELECT TOP 1 fb_id FROM user_profiles WHERE fb_id = " + fb_id+" group by fb_id";
     }
+
+
+
+
+    public String insertQuestionQueryBuilder(Questions q){
+
+        if(q.qtype.equalsIgnoreCase("objective")){
+            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
+                    "post_time,category,hints,timer) " +
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    q.option3+","+q.option4+","+q.status1.substring(1,q.status1.length()-1)+","+q.status2.substring(1,q.status2.length()-1)+","+
+                    q.status3.substring(1,q.status3.length()-1)+","+q.status4.substring(1,q.status4.length()-1)+","+q.post_time+",'"+q.categories+"',"+q.hints+"," +
+                    q.timer+")";
+        }
+        else{
+            return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
+                    "post_time,category,hints,timer) " +
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    q.option3+","+q.option4+","+q.status1+","+q.status2+","+
+                    q.status3+","+q.status4+","+q.post_time+",'"+q.categories+"',"+q.hints+
+                    ","+q.timer+")";
+        }
+    }
+}
 
 

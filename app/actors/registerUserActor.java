@@ -21,8 +21,6 @@ public class registerUserActor extends UntypedActor {
 
 
     public String insertQueryRegisterBuilder(RegisteredUser reguser){
-
-
         return "INSERT INTO user_profiles(email,password_string) values("+reguser.email+",SHA2("+reguser.password+",512))";
     }
 
