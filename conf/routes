@@ -19,3 +19,5 @@ POST    /checkUserIfSaberaUserExists            controllers.MainController.check
 POST    /checkUserIfFbUserExists                controllers.MainController.checkUserIfFbUserExists
 POST    /register                               controllers.MainController.registerNormalUser
 POST    /storeUserProfile                       controllers.MainController.storeCredentials
+POST    /storeDeviceToken                       controllers.MainController.updateDeviceToken
+POST    /postAnswer                             controllers.MainController.postAnswer
