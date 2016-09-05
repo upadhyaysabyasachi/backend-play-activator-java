@@ -21,3 +21,5 @@ POST    /register                               controllers.MainController.regis
 POST    /storeUserProfile                       controllers.MainController.storeCredentials
 POST    /storeDeviceToken                       controllers.MainController.updateDeviceToken
 POST    /postAnswer                             controllers.MainController.postAnswer
+POST    /storeChat                              controllers.MainController.storeChat
+POST    /loadChat                               controllers.MainController.loadChat

@@ -1,6 +1,7 @@
 package actors;
 
 import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Notification;
 import com.google.android.gcm.server.Sender;
 
 import java.io.IOException;
@@ -17,10 +18,14 @@ public class SampleGCMSender {
         final Sender sender = new Sender("AIzaSyAwlhqfNKiK1HCjS3bzNh7XbrseeOzCtcY");
         com.google.android.gcm.server.MulticastResult result = null;
 
+
+
+
         final Message pushMessage = new Message.Builder().timeToLive(30)
                 .delayWhileIdle(true)
                 .addData("date", new Date().getTime() + "")
-                .addData("message", "You are matched with ").build();
+                .addData("message", "You are matched with ").
+                        build();
 
         final List<String> regids = new ArrayList<String>();
         //regids.add("c3klWR0WtP0:APA91bEQPLOhv1DP_1drNCTocj2ArY3omWaq2PPEKxk7Mx9_cURqHh3My2FD5gAQoJ6vGDKavxjyKSqxuuKlBDbFXR-VZC5W0MVxADbwNHnN-ikVqo4MgAciit5RYBYPjGj73qovUkGV");

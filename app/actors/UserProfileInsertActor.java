@@ -35,8 +35,8 @@ public class UserProfileInsertActor  extends UntypedActor {
 
     }
 
-    public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
-        Statement stmt = conn.createStatement();
+    public static JSONArray loadQuestions(String uid, Statement stmt) throws SQLException{
+
         //without filters
         JSONArray arr = new JSONArray();
         ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
@@ -68,9 +68,7 @@ public class UserProfileInsertActor  extends UntypedActor {
 
     }
 
-    public static JSONObject loadProfile(String userid, Connection conn) throws  SQLException{
-
-        Statement stmt = conn.createStatement();
+    public static JSONObject loadProfile(String userid, Statement stmt) throws  SQLException{
         //without filters
         JSONObject obj = new JSONObject();
         System.out.println("select sex, dob, preferred_categories, email, fullname from user_profiles" +
@@ -83,7 +81,6 @@ public class UserProfileInsertActor  extends UntypedActor {
             obj.put("preferred_categories",rs.getString("preferred_categories"));
             obj.put("email",rs.getString("email"));
             obj.put("fullname",rs.getString("fullname"));
-
         }
 
         return obj;
@@ -114,7 +111,7 @@ public class UserProfileInsertActor  extends UntypedActor {
                         int a = ps.executeUpdate(); // do something with the connection.
                         ResultSet key = ps.getGeneratedKeys();
                             System.out.println("userid" + user.uid);
-                            JSONArray questions = loadQuestions(user.uid,conn);
+                            JSONArray questions = loadQuestions(user.uid,stmt);
                             System.out.println("loading questions done");
                             //JSONObject profileObj =  loadProfile(userid,conn);
                             //System.out.println("loading profiles  done");
@@ -123,11 +120,7 @@ public class UserProfileInsertActor  extends UntypedActor {
                             jobj.put("questions",questions);
                             System.out.println("jsonstring obtained is " + jobj.toJSONString());
                             getSender().tell(jobj.toJSONString(),self());
-
-
                     }
-
-
                 }
 
             } catch (SQLException e) {

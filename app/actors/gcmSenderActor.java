@@ -40,10 +40,11 @@ public class gcmSenderActor extends UntypedActor {
                 "                        uid_questioner," +
                 "                        attempted_answer," +
                 "                        attempted_keywords," +
+                "                        correct_keywords," +
                 "                        match_status," +
                 "                        answer_time) "+
                 " values("+obj.qid+","+obj.uid_a+","+obj.uid_q+",'"+obj.attempted_answer+"','"+obj.attempted_keywords+"','"+
-                obj.match_status+"','"+obj.answer_time+"')";
+                ","+obj.correct_keywords+","+obj.match_status+"','"+obj.answer_time+"')";
     }
 
     public static int distance(String a, String b){
@@ -104,16 +105,19 @@ public class gcmSenderActor extends UntypedActor {
         return arr;
     }
 
-    public void notifyUsersOfMatch(ArrayList<String> device_tokens, String qid){
+    public void notifyUsersOfMatch(ArrayList<String> device_tokens, String qid, String payload){
         System.out.println("MAtch has happened..sending notification");
         final Sender sender = new Sender("AIzaSyAwlhqfNKiK1HCjS3bzNh7XbrseeOzCtcY");
         com.google.android.gcm.server.MulticastResult result = null;
 
-        final Message pushMessage = new Message.Builder().timeToLive(30)
+        final Message pushMessage = new Message
+                .Builder()
+                .timeToLive(30)
                 .delayWhileIdle(true)
                 .addData("date", new Date().getTime() + "")
-                .addData("message", "You got a match for qid: " + qid).build();
-
+                .addData("message", "You got a match for qid: " + qid)
+                .addData("questionInfo", payload)
+                .build();
 
         System.out.println("message is " + pushMessage.getData().toString());
         System.out.println("tokens to which messages have to be sent are " + String.valueOf(device_tokens));
@@ -126,6 +130,158 @@ public class gcmSenderActor extends UntypedActor {
         }
 
 
+    }
+
+    public String insertIntoChatDB(String uid_sender, String uid_receiver, String senderType){
+        if(senderType.equalsIgnoreCase("questioner")){
+            return "INSERT INTO conversations(uid_sender,uid_receiver,message,time_stamp) values("+uid_sender+","
+                    +uid_receiver+",'You answered my question, You are indeed a real match'"+","+new Date().getTime() +")";
+        }else{
+            return "INSERT INTO conversations(uid_sender,uid_receiver,message,time_stamp) values("+uid_sender+","
+                    +uid_receiver+",'Yes, I did! '"+","+new Date().getTime() +")";
+        }
+
+    }
+
+    public String createChatEntryInDB(String uid_sender, String uid_receiver){
+        //create an entry to store the first chat string for sender - You answered my match, You are indeed a "real match"
+        //create an entry to store the second chat string for receiver - Yes, I did!
+
+            BoneCP pool = null;
+            Connection conn = null;
+            try{
+                pool = DBConnectionPool.getConnectionPool();
+                if(pool!=null){
+                    conn = pool.getConnection();
+                    if(conn != null){
+                        Statement stmt = conn.createStatement();
+
+                        System.out.println("query for inserting into chat db for questioner is " + insertIntoChatDB(uid_sender, uid_receiver, "questioner"));
+                        PreparedStatement ps1 = conn.prepareStatement(insertIntoChatDB(uid_sender, uid_receiver, "questioner"),
+                                Statement.RETURN_GENERATED_KEYS);
+                        int a1 = ps1.executeUpdate();
+
+                        System.out.println("query for inserting into chat db for receiver is " + insertIntoChatDB(uid_sender, uid_receiver, "answerer"));
+                        PreparedStatement ps2 = conn.prepareStatement(insertIntoChatDB(uid_sender, uid_receiver, "answerer"),
+                                Statement.RETURN_GENERATED_KEYS);
+
+                        int a2 = ps2.executeUpdate();
+
+                        return "success";
+                    }
+                }
+            }catch (SQLException sqe){
+                sqe.printStackTrace();
+            }finally{
+                if(conn!=null){
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        return "failure";
+
+        }
+
+    public String getProfileString(String uid){
+        return "select DOB," +
+                "fullname," +
+                "sex," +
+                "preferred_categories from user_profiles where userid = " + uid;
+    }
+
+    public String getQuestionsString(String uid_answerer, String uid_questioner){
+
+        return "select ans.uid_answerer,ans.uid_questioner,qs.qstring, qs.proposed_keywords,ans.attempted_answer from questions qs join answers ans " +
+                "on ans.qid = qs.qid where ans.uid_answerer = "+uid_answerer +" and ans.uid_questioner = "+uid_questioner+
+                " and match_status like 'yes'";
+
+    }
+
+    public String giveUserProfileOfTheMatchedPerson(String uid_answerer, String uid_questioner){
+        {
+            BoneCP pool = null;
+            Connection conn = null;
+            try{
+                pool = DBConnectionPool.getConnectionPool();
+                if(pool!=null){
+                    conn = pool.getConnection();
+                    if(conn != null){
+                        Statement stmt = conn.createStatement();
+
+                        System.out.println("query for getting profile answerer from DB is  " + getProfileString(uid_answerer));
+                        ResultSet rs = stmt.executeQuery(getProfileString(uid_answerer));
+                        JSONObject profileObj = new JSONObject();
+                        while(rs.next()){
+                            JSONObject jobj = new JSONObject();
+                            String dob = rs.getString("DOB");
+                            String fullname = rs.getString("fullname");
+                            String sex = rs.getString("sex");
+                            String preferred_categories = rs.getString("preferred_categories");
+                            jobj.put("DOB",dob);
+                            jobj.put("fullname",fullname);
+                            jobj.put("sex",sex);
+                            jobj.put("preferred_categories",preferred_categories);
+                            profileObj.put("answerer",jobj);
+
+                        }
+
+
+                        System.out.println("query for getting profile questioner from DB is  " + getProfileString(uid_questioner));
+                        ResultSet rs1 = stmt.executeQuery(getProfileString(uid_answerer));
+
+                        while(rs1.next()){
+                            JSONObject jobj = new JSONObject();
+                            String dob = rs.getString("DOB");
+                            String fullname = rs.getString("fullname");
+                            String sex = rs.getString("sex");
+                            String preferred_categories = rs.getString("preferred_categories");
+                            jobj.put("DOB",dob);
+                            jobj.put("fullname",fullname);
+                            jobj.put("sex",sex);
+                            jobj.put("preferred_categories",preferred_categories);
+                            profileObj.put("questioner",uid_questioner);
+                        }
+
+
+
+                        System.out.println("query for getting questions answered from DB is  " + getQuestionsString(uid_answerer,
+                                uid_questioner));
+                        ResultSet rs2 = stmt.executeQuery(getQuestionsString(uid_answerer,
+                                uid_questioner));
+
+                        JSONArray arr = new JSONArray();
+                        while(rs2.next()){
+                            JSONObject obj = new JSONObject();
+                            obj.put("question",rs1.getString("qstring"));
+                            obj.put("proposed_keywords",rs1.getString("proposed_keywords"));
+                            obj.put("attempted_answer",rs1.getString("attempted_answer"));
+                            obj.put("uid_questioner",rs.getString("uid_questioner"));
+                            obj.put("uid_answerer",rs.getString("uid_answerer"));
+                            arr.add(obj);
+
+                        }
+                        profileObj.put("QandA",arr);
+                        return profileObj.toJSONString();
+
+
+                    }
+                }
+            }catch (SQLException sqe){
+                sqe.printStackTrace();
+            }finally{
+                if(conn!=null){
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return "failure";
+        }
     }
 
     public String storeIntoAnswersDB(Answers obj){
@@ -142,8 +298,6 @@ public class gcmSenderActor extends UntypedActor {
                             Statement.RETURN_GENERATED_KEYS);
                     int a = ps.executeUpdate();
                     return "success";
-
-
                 }
             }
         }catch (SQLException sqe){
@@ -206,10 +360,14 @@ public class gcmSenderActor extends UntypedActor {
                             devices.add(regId_answerer.get(i).toString());
                         }
 
-                        notifyUsersOfMatch(devices, qid);
-
-                        String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, String.join(",", answers_a), String.join(",", answers_a),
+                        String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_answerer.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
                                 "yes", answer_time));
+
+                        createChatEntryInDB(uid_answerer,uid_questioner);
+
+                        String profileObjPayload = giveUserProfileOfTheMatchedPerson(uid_answerer,uid_questioner);
+
+                        notifyUsersOfMatch(devices, qid, profileObjPayload);
 
                         if(status.equalsIgnoreCase("success")){
                             JSONObject jobj = new JSONObject();
@@ -225,7 +383,7 @@ public class gcmSenderActor extends UntypedActor {
                     }
                     else{
                         //not a match
-                        String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, String.join(",", answers_a), String.join(",", answers_a),
+                        String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_answerer.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
                                 "no", answer_time));
 
                         if(status.equalsIgnoreCase("success")){
@@ -240,7 +398,7 @@ public class gcmSenderActor extends UntypedActor {
                     }
                 }else{
                     //not a match
-                    String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, String.join(",", answers_a), String.join(",", answers_a),
+                    String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_answerer.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
                             "no", answer_time));
 
                     if(status.equalsIgnoreCase("success")){
@@ -311,10 +469,16 @@ public class gcmSenderActor extends UntypedActor {
                         devices.add(regId_answerer.get(i).toString());
                     }
 
-                    notifyUsersOfMatch(devices, qid);
+                    //notifyUsersOfMatch(devices, qid);
 
-                    String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, String.join(",", answers_a), String.join(",", answers_a),
+                    String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_questioner.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
                             "yes", answer_time));
+
+                    createChatEntryInDB(uid_answerer,uid_questioner);
+
+                    String profileObjPayload = giveUserProfileOfTheMatchedPerson(uid_answerer,uid_questioner);
+
+                    notifyUsersOfMatch(devices, qid, profileObjPayload);
 
                     if(status.equalsIgnoreCase("success")){
                         JSONObject jobj = new JSONObject();

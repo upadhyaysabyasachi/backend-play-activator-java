@@ -2,11 +2,14 @@ package actors;
 
 import akka.actor.UntypedActor;
 import com.jolbox.bonecp.BoneCP;
+import models.ChatObject;
 import models.DBConnectionPool;
 //import models.FBUser;
 import models.NormalUser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import scala.compat.java8.FutureConverters;
 
 import java.sql.*;
@@ -32,6 +35,7 @@ public class checkIfUserExistsActor extends UntypedActor {
 
 
 
+
     public static String  checkQueryNormalUserBuilder(NormalUser user){
         return "SELECT userid FROM user_profiles WHERE email = " + user.email+" and password_string like SHA2("+user.password+",512) "+"limit 1";
     }
@@ -40,59 +44,94 @@ public class checkIfUserExistsActor extends UntypedActor {
         return "";
     }
 
+    public static String getMatchingUserIdWhileAnswering(String uid_login){
+
+        return "select distinct ans.uid_questioner from questions qs join answers ans  " +
+                "on ans.qid = qs.qid where ans.uid_answerer = "+uid_login +
+                " and match_status like 'yes'";
+
+    }
+
+    public static String getMatchingUsers(String uid_login){
+
+        return "select distinct ans.uid_answerer uid  from  questions qs join answers ans " +
+                "on ans.qid = qs.qid where (ans.uid_questioner = "+uid_login +" OR ans.uid_answerer =  " + uid_login+")"+
+                " and match_status like 'yes'";
+
+    }
 
 
+    public static String getMatchingUserQuestionsinfo(String uid_login, String uid_matcher){
 
-   /* public static JSONArray loadQuestions(String uid, Connection conn) throws SQLException{
-        Statement stmt = conn.createStatement();
-        //without filters
-        JSONArray arr = new JSONArray();
-        ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
-                " where userid <> " + uid + " limit 10");
+        return "select ans.uid_answerer, ans.uid_questioner, qs.qstring, qs.proposed_keywords,ans.attempted_answer " +
+                "from questions qs join answers ans " +
+                "on ans.qid = qs.qid  where ans.uid_answerer = "+uid_login +" and ans.uid_questioner = " + uid_matcher+
+                " and match_status like 'yes'" +
+                " UNION " +
+                "select ans.uid_answerer, ans.uid_questioner, qs.qstring, qs.proposed_keywords,ans.attempted_answer " +
+                "from questions qs join answers ans " +
+                "on ans.qid = qs.qid  where ans.uid_answerer = "+uid_matcher +" and ans.uid_questioner = " + uid_login+
+                " and match_status like 'yes'";
+
+    }
+
+    public static String getMatchingUsersWhileQuestioning(String uid_login, String uid_matcher){
+
+        return "select qs.qid qid, ans.aid aid, ans.uid_answerer answerer, ans.uid_questioner questioner ,qs.qstring qtsring, " +
+                "qs.proposed_keywords proposed_keywords ,ans.attempted_answer attempted_answer from questions qs" +
+                " join answers ans " +
+                "on ans.qid = qs.qid  where ans.uid_questioner = "+ uid_login + " and ans.uid_answerer = " + uid_matcher+
+                " and match_status like 'yes'";
+    }
+
+
+    public static JSONObject QandA(Statement stmt, String query) throws SQLException, ParseException {
+
+        JSONObject finalObj = new JSONObject();
+        JSONArray arrQandA =  new JSONArray();
+        JSONParser parser =  new JSONParser();
+        ResultSet rs = stmt.executeQuery(query);
+
         while(rs.next()){
-            JSONObject obj = new JSONObject();
-            obj.put("qstring",rs.getString("qstring"));
-            obj.put("qtypes",rs.getString("qtype"));
-            obj.put("proposed_answer",rs.getString("proposed_answer"));
-            obj.put("hints",rs.getString("hints"));
-            obj.put("timer",rs.getString("timer"));
-            obj.put("option1",rs.getString("option1"));
-            obj.put("option2",rs.getString("option2"));
-            obj.put("option3",rs.getString("option3"));
-            obj.put("option4",rs.getString("option4"));
-            obj.put("status1",rs.getString("status1"));
-            obj.put("status2",rs.getString("status2"));
-            obj.put("status3",rs.getString("status3"));
-            obj.put("status4",rs.getString("status4"));
-            obj.put("uid",rs.getString("userid"));
-            obj.put("qid",rs.getString("qid"));
-            obj.put("proposed_keywords",rs.getString("proposed_keywords"));
-            arr.add(obj);
-
-            //arr.add(obj);
+            JSONObject jobj = new JSONObject();
+            jobj.put("qstring",rs.getString("qtsring"));
+            jobj.put("ans_id",rs.getString("aid"));
+            jobj.put("ques_id",rs.getString("qid"));
+            JSONArray attempted_answer = (JSONArray)parser.parse(rs.getString("attempted_answer"));
+            jobj.put("attempted_answer",attempted_answer);
+            JSONArray proposed_keywords = (JSONArray)parser.parse(rs.getString("proposed_keywords"));
+            jobj.put("proposed_keywords",proposed_keywords);
+            arrQandA.add(jobj);
         }
 
-        JSONObject mainObj = new JSONObject();
-        mainObj.put("questions", arr);
-        return arr;
-
-    }*/
-
-    /*qid BIGINT NOT NULL AUTO_INCREMENT,
-                            userid BIGINT,
-                            qtype	varchar(11),
-                            qstring varchar(255),
-                            proposed_answer	varchar(255),
-                            proposed_keywords varchar(255),
-                            option1	varchar(20),
-                            option2 varchar(20),
-                            option3 varchar(20),
-                            option4 varchar(20),
-                            post_time	datetime*/
+        finalObj.put("QandA",arrQandA);
+        return finalObj;
+    }
 
 
+    public static JSONObject matchedUserProfiles(String userid, Statement stmt) throws SQLException, ParseException {
+        //without filters
 
-    public   static JSONObject checkForFirstTimeNormalUser(NormalUser user)  {
+        JSONObject matchedUsersObject = new JSONObject();
+        JSONArray matchedUserProfileArray = new JSONArray();
+        ResultSet rs_matches_answering_uids = stmt.executeQuery(getMatchingUsers(userid));
+        while(rs_matches_answering_uids.next()){
+            JSONObject each_user_obj = new JSONObject();
+            String each_matching_userid = rs_matches_answering_uids.getString("uid");
+            //get the profile for the matcher
+            JSONObject matcher_profile = UserProfileInsertActor.loadProfile(each_matching_userid, stmt);
+            JSONObject QandAForThisMatcher = QandA(stmt, getMatchingUserQuestionsinfo(userid,each_matching_userid));
+            JSONObject chatsWithThisUser = loadChatActor.loadChats(new ChatObject(each_matching_userid,userid),stmt);
+            matcher_profile.put("QandA",(JSONArray)QandAForThisMatcher.get("QandA"));
+            matcher_profile.put("chats",(JSONArray)QandAForThisMatcher.get("chats"));
+            matchedUserProfileArray.add(each_user_obj);
+        }
+        matchedUsersObject.put("matched_users",matchedUserProfileArray);
+
+        return matchedUsersObject;
+    }
+
+    public   static JSONObject checkForFirstTimeNormalUser(NormalUser user) throws ParseException {
         BoneCP pool = DBConnectionPool.getConnectionPool();
         Connection conn = null;
 
@@ -111,19 +150,18 @@ public class checkIfUserExistsActor extends UntypedActor {
                     while (rs.next()) {
                         JSONObject jobj = new JSONObject();
                         String uid = rs.getString("userid");
-                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, conn);
-                        jobj.put("status", "old");
-                        //jobj.put("questions", questionObj);
-                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, conn);
-                        //JSONObject jobj = new JSONObject();
-                        jobj.put("userid", uid);
-                        jobj.put("questions", questionObj);
-                        jobj.put("sex", profileObj.get("sex"));
-                        jobj.put("dob", profileObj.get("dob"));
-                        jobj.put("email", profileObj.get("email"));
-                        jobj.put("preferred_categories", profileObj.get("preferred_categories"));
-                        jobj.put("fullname", profileObj.get("fullname"));
-                        return jobj;
+
+                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, stmt);
+                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, stmt);
+                        JSONObject matchedUsersProfile =  matchedUserProfiles(uid,stmt);
+
+
+                        profileObj.put("matched_users",matchedUsersProfile.get("matched_users"));
+                        profileObj.put("questions",questionObj);
+                        profileObj.put("chats",matchedUsersProfile.get("chats"));
+                        profileObj.put("old",questionObj);
+
+                        return profileObj;
                     }
                 }
 
@@ -199,11 +237,11 @@ public class checkIfUserExistsActor extends UntypedActor {
                         JSONObject jobj = new JSONObject();
                         String uid = rs.getString("userid");
 
-                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, conn);
+                        JSONArray questionObj = UserProfileInsertActor.loadQuestions(uid, stmt);
                         jobj.put("userid", uid);
                         jobj.put("status", "old");
                         jobj.put("questions", questionObj);
-                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, conn);
+                        JSONObject profileObj = UserProfileInsertActor.loadProfile(uid, stmt);
                         //JSONObject jobj = new JSONObject();
                         //jobj.put("userid",uid);
                         //jobj.put("questions",questions);
@@ -228,7 +266,7 @@ public class checkIfUserExistsActor extends UntypedActor {
                     ResultSet key = ps.getGeneratedKeys();
                     if (key.next()) {
                         String userid = key.getInt(1) + "";
-                        JSONArray arr = UserProfileInsertActor.loadQuestions(userid, conn);
+                        JSONArray arr = UserProfileInsertActor.loadQuestions(userid, stmt);
                         JSONObject jobj = new JSONObject();
                         jobj.put("userid", userid);
                         jobj.put("status", "new");

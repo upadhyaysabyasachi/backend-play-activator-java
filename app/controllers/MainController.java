@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
 import play.libs.F;
@@ -55,6 +56,9 @@ public class MainController extends Controller {
         actorSystem.actorOf( Props.create( registerUserActor.class ), "registerUserActor");
         actorSystem.actorOf( Props.create( gcmSenderActor.class ), "gcmSenderActor");
         actorSystem.actorOf( Props.create( registrationTokenUpdateActor.class ), "registrationTokenUpdateActor");
+        actorSystem.actorOf( Props.create( storeChatActor.class ), "storeChatActor");
+        actorSystem.actorOf( Props.create( loadChatActor.class ), "loadChatActor");
+
 
     }
 
@@ -231,6 +235,46 @@ public class MainController extends Controller {
 
 
     }
+
+    public CompletionStage<Result> storeChat(){
+
+        ActorSelection storeChatActorInstance =
+                actorSystem.actorSelection( "/user/storeChatActor" );
+
+        JsonNode questionDetails = request().body().asJson();
+        String uid_sender = questionDetails.get("uid_sender").toString();
+        String uid_receiver = questionDetails.get("uid_receiver").toString();
+        String message = questionDetails.get("message").toString();
+        String timestamp = new Date().getTime()+"";
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+
+        return FutureConverters.toJava(ask(storeChatActorInstance, new ChatObject(uid_sender,uid_receiver,message,timestamp),100000))
+                .thenApply(response -> ok(response.toString()));
+    }
+
+    public CompletionStage<Result> loadChat(){
+
+
+
+        ActorSelection loadChatActorInstance =
+                actorSystem.actorSelection( "/user/loadChatActor" );
+
+        JsonNode questionDetails = request().body().asJson();
+        String uid_sender = questionDetails.get("uid_sender").toString();
+        String uid_receiver = questionDetails.get("uid_receiver").toString();
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+
+        return FutureConverters.toJava(ask(loadChatActorInstance, new ChatObject(uid_sender,uid_receiver),100000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+
+
 
 
 
