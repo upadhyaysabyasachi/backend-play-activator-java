@@ -89,9 +89,9 @@ public class checkIfUserExistsActor extends UntypedActor {
 
     public static String getMatchingUsers(String uid_login){
 
-        return "select distinct ans.uid_answerer uid  from  questions qs join answers ans " +
-                "on ans.qid = qs.qid where (ans.uid_questioner = "+uid_login +" OR ans.uid_answerer =  " + uid_login+")"+
-                " and match_status like 'yes'";
+        return "select distinct uid_answerer uid from answers where uid_questioner ="+ uid_login+ " " +
+        "UNION "+
+        "select uid_questioner uid from answers where uid_answerer = " + uid_login;
 
     }
 

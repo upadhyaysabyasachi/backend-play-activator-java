@@ -61,12 +61,13 @@ public class storeChatActor extends UntypedActor {
                                 if (key.next()) {
                                     String chatid = key.getInt(1) + "";
                                     JSONObject jobj = new JSONObject();
-                                    jobj.put("chatid", chatid);
+                                    jobj.put("chat_id", chatid);
                                     jobj.put("message", chat.message);
                                     jobj.put("uid_sender",chat.uid_sender);
                                     jobj.put("uid_receiver",chat.uid_receiver);
                                     jobj.put("flag","chat");
                                     jobj.put("time_stamp",chat.timestamp);
+                                    jobj.put("status","success");
 
                                     JSONArray regId_receiver = gcmSenderActor.getRegistrationToken(chat.uid_receiver);
                                     //JSONArray regId_answerer = getRegistrationToken(uid_answerer);
@@ -74,7 +75,10 @@ public class storeChatActor extends UntypedActor {
                                     ArrayList<String> devices = new ArrayList<String>();
 
                                     for(int i=0; i< regId_receiver.size(); i++){
-                                        devices.add(regId_receiver.get(i).toString());
+                                        if(regId_receiver.get(i)!=null){
+                                            devices.add(regId_receiver.get(i).toString());
+                                        }
+
                                     }
 
                                     //Sending the chat
@@ -87,10 +91,10 @@ public class storeChatActor extends UntypedActor {
                                             .timeToLive(30)
                                             .delayWhileIdle(true)
                                             .addData("date", new java.util.Date().getTime() + "")
-                                            .addData("chatInfo", jobj.toJSONString())
+                                            .addData("message", jobj.toJSONString())
                                             .build();
 
-                                    System.out.println("message is " + pushMessage.getData().toString());
+                                    System.out.println("message" + pushMessage.getData().toString());
                                     System.out.println("tokens to which messages have to be sent are " + String.valueOf(devices));
                                     //Logger.info("entered2 : " + regids.size());
                                     try {
@@ -101,7 +105,7 @@ public class storeChatActor extends UntypedActor {
                                     }
 
 
-
+                                    System.out.println("response is "+jobj.toJSONString());
 
                                     getSender().tell(jobj.toJSONString(), self());
                                 }
