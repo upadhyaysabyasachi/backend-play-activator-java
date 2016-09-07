@@ -29,8 +29,8 @@ public class SampleGCMSender {
 
         final List<String> regids = new ArrayList<String>();
         //regids.add("c3klWR0WtP0:APA91bEQPLOhv1DP_1drNCTocj2ArY3omWaq2PPEKxk7Mx9_cURqHh3My2FD5gAQoJ6vGDKavxjyKSqxuuKlBDbFXR-VZC5W0MVxADbwNHnN-ikVqo4MgAciit5RYBYPjGj73qovUkGV");
-        regids.add("c94ryVJbk4s:APA91bGCBD2chv8z28MX-3V3C0jt00EQKH36nWi-GmRSZBGxevojJrDtLaoY_PBWaE7totp7aHFL9y1zT6KTe-IWLXX59hQxCvKuGiSEwcHMmoIf9M3u4CtqrmfiBkKKPqKV8Ob-Chlp");
-        regids.add("dcRxhAUhq5Q:APA91bEGID4bGPwEjh2RjOZMYpNS9qAu09IEfRxBqgtnN78h10Ooadt_Py0AmU8dqEW1S7rHZf9cORpCzq31HHKNFvcMsjyB2nwS6QeRFYCiU01WQrs1DWbcULWfk3ZdD8JauhA4ytHM");
+        regids.add("dTNGFKnklN4:APA91bGlsCMPLOG3hOzOIR31HyXB8nI85rKosyuD4a3tlPcHD341GR90T9aDyIgvfO7dodi55Bo6seBefZDT6SW31T0P7pVUUqYGPJ_-9bYlnFACxOnRh2NO_cjmJi0pjGFdhE5PV2V9");
+        regids.add("chgi0VgFvsE:APA91bGY3mpaJDagnz9VlGchZkMTaIBqZcEYNKqMRe5Yo7rxES4xRO4KH3bLNSH8NR-BiIz_UmJQyYBWoTgD7Q6N568rZu3cx9xmZf5eGqKadLFFMhH0QkgBg2t1nXNHts0EFIe4x-zF");
         //regids.add("cvcefGEh0AU:APA91bFA3ZjvAt7HJ3ncpDJ3P0dczk4Pco4xYt4RnbdvErlu1YvS_YMcMuslrn0IO05vnRDuo6gjXs74q9YwtKXu4-TKLIeyJbmFWn_bXWiV4VBtImRy9CYh2WRmDS90O9qyNvTKrAj2");
         //regids.add("fWCXK2Z-QDQ:APA91bHySTdtT7crtYIezBkja75kXpy1k8Fp1o5iRx0eaQbXXrf4VxavfMj73l8j4glINXp1MxHbXiZ6hjmOi7WYp2LnkSN3XMKtMOyAp3oQo82iAiR-8NF9CKxzWQGOpsi0efLYVD7d");
         //regids.add(regId_questioner);

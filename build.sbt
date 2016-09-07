@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "com.google.gcm" % "gcm-server" % "1.0.0",
   "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
   "org.apache.lucene" % "lucene-snowball" % "3.0.3",
-  "org.apache.lucene" % "lucene-analyzers" % "3.4.0"
+  "org.apache.lucene" % "lucene-analyzers" % "3.4.0",
+  "javax.mail" % "mail" % "1.4.7"
 )
 
 

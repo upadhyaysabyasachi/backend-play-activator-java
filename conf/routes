@@ -23,3 +23,4 @@ POST    /storeDeviceToken                       controllers.MainController.updat
 POST    /postAnswer                             controllers.MainController.postAnswer
 POST    /storeChat                              controllers.MainController.storeChat
 POST    /loadChat                               controllers.MainController.loadChat
+POST    /logout                                 controllers.MainController.logout

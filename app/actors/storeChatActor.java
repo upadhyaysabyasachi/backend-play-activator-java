@@ -1,16 +1,20 @@
 package actors;
 
 import akka.actor.UntypedActor;
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Sender;
 import com.jolbox.bonecp.BoneCP;
 import models.ChatObject;
 import models.DBConnectionPool;
 import models.Questions;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+
+import static org.reflections.util.ConfigurationBuilder.build;
 
 /**
  * Created by sabyasachi.upadhyay on 04/09/16.
@@ -53,9 +57,55 @@ public class storeChatActor extends UntypedActor {
                                 PreparedStatement ps = conn.prepareStatement(insertChatQueryBuilder(chat),
                                         Statement.RETURN_GENERATED_KEYS);
                                 int a = ps.executeUpdate(); // do something with the connection.
-                                JSONObject jobj = new JSONObject();
-                                jobj.put("status","success");
-                                getSender().tell(jobj.toJSONString(),self());
+                                ResultSet key = ps.getGeneratedKeys();
+                                if (key.next()) {
+                                    String chatid = key.getInt(1) + "";
+                                    JSONObject jobj = new JSONObject();
+                                    jobj.put("chatid", chatid);
+                                    jobj.put("message", chat.message);
+                                    jobj.put("uid_sender",chat.uid_sender);
+                                    jobj.put("uid_receiver",chat.uid_receiver);
+                                    jobj.put("flag","chat");
+                                    jobj.put("time_stamp",chat.timestamp);
+
+                                    JSONArray regId_receiver = gcmSenderActor.getRegistrationToken(chat.uid_receiver);
+                                    //JSONArray regId_answerer = getRegistrationToken(uid_answerer);
+
+                                    ArrayList<String> devices = new ArrayList<String>();
+
+                                    for(int i=0; i< regId_receiver.size(); i++){
+                                        devices.add(regId_receiver.get(i).toString());
+                                    }
+
+                                    //Sending the chat
+                                    System.out.println("Sending the chat");
+                                    final Sender sender = new Sender("AIzaSyAwlhqfNKiK1HCjS3bzNh7XbrseeOzCtcY");
+                                    com.google.android.gcm.server.MulticastResult result = null;
+
+                                    final Message pushMessage = new Message
+                                            .Builder()
+                                            .timeToLive(30)
+                                            .delayWhileIdle(true)
+                                            .addData("date", new java.util.Date().getTime() + "")
+                                            .addData("chatInfo", jobj.toJSONString())
+                                            .build();
+
+                                    System.out.println("message is " + pushMessage.getData().toString());
+                                    System.out.println("tokens to which messages have to be sent are " + String.valueOf(devices));
+                                    //Logger.info("entered2 : " + regids.size());
+                                    try {
+                                        result = sender.send(pushMessage, devices, 1);
+                                        System.out.println("notification sent");
+                                    } catch (final IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+
+
+
+                                    getSender().tell(jobj.toJSONString(), self());
+                                }
+
                             }catch (SQLException se){
                                 se.printStackTrace();
                                 JSONObject jobj = new JSONObject();

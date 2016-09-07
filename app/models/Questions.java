@@ -12,7 +12,7 @@ public class Questions {
     public String qtype;
     public String qstring;
     public String proposed_answer;
-    public String keywords;
+    public String proposed_keywords;
     public String hints;
     public String option1;
     public String option2;
@@ -31,7 +31,7 @@ public class Questions {
         this.qtype = param2;
         this.qstring = param3;
         this.proposed_answer = param4;
-        this.keywords = param5;
+        this.proposed_keywords = param5;
         this.option1 = param6;
         this.option2 = param7;
         this.option3 = param8;

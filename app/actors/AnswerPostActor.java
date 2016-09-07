@@ -122,14 +122,14 @@ public class AnswerPostActor extends UntypedActor {
         if(q.qtype.equalsIgnoreCase("objective")){
             return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
                     "post_time,category,hints) " +
-                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+",'"+q.proposed_keywords+"',"+q.option1+","+q.option2+","+
                     q.option3+","+q.option4+","+q.status1.substring(1,q.status1.length()-1)+","+q.status2.substring(1,q.status2.length()-1)+","+
                     q.status3.substring(1,q.status3.length()-1)+","+q.status4.substring(1,q.status4.length()-1)+","+q.post_time+","+q.categories+","+q.hints+")";
         }
         else{
             return "INSERT INTO questions(userid,qtype,qstring,proposed_answer,proposed_keywords,option1,option2,option3,option4,status1,status2,status3,status4," +
                     "post_time,category) " +
-                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+","+q.keywords+","+q.option1+","+q.option2+","+
+                    "values(" + q.userid+",'"+q.qtype+"',"+q.qstring+","+q.proposed_answer+",'"+q.proposed_keywords+"',"+q.option1+","+q.option2+","+
                     q.option3+","+q.option4+","+q.status1+","+q.status2+","+
                     q.status3+","+q.status4+","+q.post_time+","+q.categories+","+q.hints+")";
         }

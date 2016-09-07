@@ -58,6 +58,8 @@ public class MainController extends Controller {
         actorSystem.actorOf( Props.create( registrationTokenUpdateActor.class ), "registrationTokenUpdateActor");
         actorSystem.actorOf( Props.create( storeChatActor.class ), "storeChatActor");
         actorSystem.actorOf( Props.create( loadChatActor.class ), "loadChatActor");
+        actorSystem.actorOf( Props.create( logOutActor.class ), "logoutActor");
+
 
 
     }
@@ -134,10 +136,18 @@ public class MainController extends Controller {
                 actorSystem.actorSelection( "/user/QuestionPostActor" );
 
         JsonNode questionDetails = request().body().asJson();
+        JSONParser parser = new JSONParser();
         String question = questionDetails.get("question").toString();
         String uid = questionDetails.get("userid").toString();
         String qtype = questionDetails.get("qtype").toString().substring(1,questionDetails.get("qtype").toString().length()-1);
+        String proposed_keywords_json = questionDetails.get("proposed_keywords").toString();
+        JSONArray proposed_keywords = null;
         String proposed_answer = null;
+        try {
+            proposed_keywords = (JSONArray)parser.parse(proposed_keywords_json);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("qtype " + qtype);
         if(qtype.equalsIgnoreCase("subjective")) {
@@ -193,7 +203,7 @@ public class MainController extends Controller {
 
         System.out.println("proposed answer "+proposed_answer);
         System.out.println("hints given is " + hints);
-        return FutureConverters.toJava(ask(QuestionPostActorInstance, new Questions(uid,qtype,question,proposed_answer,keywords,
+        return FutureConverters.toJava(ask(QuestionPostActorInstance, new Questions(uid,qtype,question,proposed_answer,proposed_keywords.toJSONString() ,
                 option1,option2,option3,option4,status1,status2,status3,status4,hints,timer,post_time, categories),100000))
                 .thenApply(response -> ok(response.toString()));
     }
@@ -245,7 +255,7 @@ public class MainController extends Controller {
         String uid_sender = questionDetails.get("uid_sender").toString();
         String uid_receiver = questionDetails.get("uid_receiver").toString();
         String message = questionDetails.get("message").toString();
-        String timestamp = new Date().getTime()+"";
+        String timestamp = questionDetails.get("time_stamp").toString();
 
         //String answer_answerer = questionDetails.get("answer_answerer").toString();
         //String questioner_answerer = questionDetails.get("answer_questioner").toString();
@@ -269,6 +279,27 @@ public class MainController extends Controller {
         //String questioner_answerer = questionDetails.get("answer_questioner").toString();
 
         return FutureConverters.toJava(ask(loadChatActorInstance, new ChatObject(uid_sender,uid_receiver),100000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+    public CompletionStage<Result> logout(){
+        ActorSelection logoutActorInstance =
+                actorSystem.actorSelection( "/user/logoutActor" );
+
+        JsonNode logoutDetails = request().body().asJson();
+        String uid = logoutDetails.get("userid").toString();
+        String device_token = logoutDetails.get("device_token").toString();
+
+        JSONObject jobj = new JSONObject();
+        jobj.put("uid", uid);
+        jobj.put("device_token", device_token);
+
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+
+        return FutureConverters.toJava(ask(logoutActorInstance, jobj,100000))
                 .thenApply(response -> ok(response.toString()));
 
     }

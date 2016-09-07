@@ -24,13 +24,15 @@ public class loadChatActor extends UntypedActor{
 
     public static String getChatQueryString(ChatObject obj){
 
-        return "select message uid_receiver,uid_sender, message, time_stamp from conversations where uid_receiver = " + obj.uid_receiver + " and " +
-                "uid_sender = " + obj.uid_sender + " order by time_stamp limit 20";
+        return "select cid, uid_receiver,uid_sender, message, time_stamp from conversations where uid_receiver = " + obj.uid_receiver + " and " +
+                "uid_sender = " + obj.uid_sender + " order by time_stamp";
 
     }
 
-    public static JSONObject loadChats(ChatObject chobj, Statement stmt) throws SQLException {
+    public static JSONObject loadChats(ChatObject chobj, Connection conn) throws SQLException {
         JSONArray chatArray = new JSONArray();
+        System.out.println("chat query string is " + getChatQueryString(chobj));
+        Statement stmt = conn.createStatement();
         ResultSet rs = stmt.executeQuery(getChatQueryString(chobj));
         while (rs.next()) {
             JSONObject obj = new JSONObject();
@@ -45,10 +47,6 @@ public class loadChatActor extends UntypedActor{
         mainObj.put("chats", chatArray);
         return mainObj;
     }
-
-
-
-
 
 
     @Override
@@ -69,7 +67,7 @@ public class loadChatActor extends UntypedActor{
                         if (conn != null) {
                             ChatObject chobj = (ChatObject) message;
                             try {
-                                JSONObject chats = loadChats(chobj,stmt);
+                                JSONObject chats = loadChats(chobj,conn);
 
                                 getSender().tell(chats.toJSONString(), self());
                             }catch (Exception se) {

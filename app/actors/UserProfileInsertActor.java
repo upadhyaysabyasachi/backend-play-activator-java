@@ -71,9 +71,9 @@ public class UserProfileInsertActor  extends UntypedActor {
     public static JSONObject loadProfile(String userid, Statement stmt) throws  SQLException{
         //without filters
         JSONObject obj = new JSONObject();
-        System.out.println("select sex, dob, preferred_categories, email, fullname from user_profiles" +
+        System.out.println("select userid,sex, dob, preferred_categories, email, fullname from user_profiles" +
                 " where userid = " + userid);
-        ResultSet rs = stmt.executeQuery("select sex, dob, preferred_categories, email, fullname from user_profiles" +
+        ResultSet rs = stmt.executeQuery("select userid,sex, dob, preferred_categories, email, fullname from user_profiles" +
                 " where userid = " + userid);
         while(rs.next()){
             obj.put("sex",rs.getString("sex"));
@@ -81,6 +81,7 @@ public class UserProfileInsertActor  extends UntypedActor {
             obj.put("preferred_categories",rs.getString("preferred_categories"));
             obj.put("email",rs.getString("email"));
             obj.put("fullname",rs.getString("fullname"));
+            obj.put("userid",rs.getString("userid"));
         }
 
         return obj;
