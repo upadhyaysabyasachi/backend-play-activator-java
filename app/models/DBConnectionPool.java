@@ -22,6 +22,7 @@ public class DBConnectionPool {
         config.setMinConnectionsPerPartition(10);
         config.setMaxConnectionsPerPartition(10);
         config.setPartitionCount(5);
+
         try {
             connectionPool = new BoneCP(config);
         } catch (SQLException e) {

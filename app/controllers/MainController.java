@@ -260,7 +260,8 @@ public class MainController extends Controller {
         //String answer_answerer = questionDetails.get("answer_answerer").toString();
         //String questioner_answerer = questionDetails.get("answer_questioner").toString();
 
-        return FutureConverters.toJava(ask(storeChatActorInstance, new ChatObject(uid_sender,uid_receiver,message,timestamp),100000))
+        return FutureConverters.toJava(ask(storeChatActorInstance, new ChatObject(uid_sender.substring(1,uid_sender.length()-1),uid_receiver.substring(1,uid_receiver.length()-1),
+                message.substring(1,message.length()-1),timestamp),100000))
                 .thenApply(response -> ok(response.toString()));
     }
 

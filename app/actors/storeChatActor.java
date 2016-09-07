@@ -66,7 +66,7 @@ public class storeChatActor extends UntypedActor {
                                     jobj.put("uid_sender",chat.uid_sender);
                                     jobj.put("uid_receiver",chat.uid_receiver);
                                     jobj.put("flag","chat");
-                                    jobj.put("time_stamp",chat.timestamp);
+                                    jobj.put("time_stamp",chat.timestamp.substring(1,chat.timestamp.length()-1));
                                     jobj.put("status","success");
 
                                     JSONArray regId_receiver = gcmSenderActor.getRegistrationToken(chat.uid_receiver);
