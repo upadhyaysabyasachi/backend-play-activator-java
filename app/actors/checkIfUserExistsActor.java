@@ -23,9 +23,9 @@ public class checkIfUserExistsActor extends UntypedActor {
         //without filters
         JSONObject obj = new JSONObject();
         Statement stmt = conn.createStatement();
-        System.out.println("select userid,sex, dob, preferred_categories, email, fullname from user_profiles" +
+        System.out.println("select userid,sex, dob, preferred_categories, email, fullname, image from user_profiles" +
                 " where userid = " + userid);
-        ResultSet rs = stmt.executeQuery("select userid,sex, dob, preferred_categories, email, fullname from user_profiles" +
+        ResultSet rs = stmt.executeQuery("select userid,sex, dob, preferred_categories, email, fullname, image  from user_profiles" +
                 " where userid = " + userid);
         while(rs.next()){
             obj.put("sex",rs.getString("sex"));
@@ -34,6 +34,8 @@ public class checkIfUserExistsActor extends UntypedActor {
             obj.put("email",rs.getString("email"));
             obj.put("fullname",rs.getString("fullname"));
             obj.put("userid",rs.getString("userid"));
+            obj.put("image_string",rs.getString("image"));
+
         }
 
         return obj;
@@ -44,8 +46,18 @@ public class checkIfUserExistsActor extends UntypedActor {
         //without filters
         JSONArray arr = new JSONArray();
         Statement stmt = conn.createStatement();
-        ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
-                " where userid <> " + uid + " limit 10");
+        String query = "select ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer," +
+                "option1,option2,option3,option4,status1,status2,status3,status4 from questions ques left outer join answers ans  " +
+                "on ques.qid = ans.qid where ques.userid <> " + uid + " and ans.uid_answerer IS NULL " +
+                "UNION " +
+                "select ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer," +
+                "option1,option2,option3,option4,status1,status2,status3,status4 from questions ques left outer join answers ans  " +
+                "on ques.qid = ans.qid where ques.userid <> 1 and ans.uid_answerer IS NOT NULL and ans.uid_answerer <> " + uid + " limit 3";
+
+        System.out.println("query for getting questions is " + query);
+
+        ResultSet rs = stmt.executeQuery(query);
+
         while(rs.next()){
             JSONObject obj = new JSONObject();
             obj.put("qstring",rs.getString("qstring"));

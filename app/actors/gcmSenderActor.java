@@ -332,6 +332,7 @@ public class gcmSenderActor extends UntypedActor {
             String uid_answerer = obj.get("uid_answerer").toString();
             String answer_time = obj.get("answer_time").toString();
 
+
             JSONArray answers_questioner = (JSONArray)parser.parse(obj.get("answer_questioner").toString());
             JSONArray answers_answerer = (JSONArray)parser.parse(obj.get("answer_answerer").toString());
 

@@ -24,3 +24,6 @@ POST    /postAnswer                             controllers.MainController.postA
 POST    /storeChat                              controllers.MainController.storeChat
 POST    /loadChat                               controllers.MainController.loadChat
 POST    /logout                                 controllers.MainController.logout
+POST    /updateProfilePicture                   controllers.MainController.updateProfilePicture
+POST    /loadMoreQuestions                      controllers.MainController.loadMoreQuestions
+POST    /passQuestion                           controllers.MainController.passQuestion

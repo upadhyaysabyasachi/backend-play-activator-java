@@ -1,15 +1,18 @@
 package controllers;
 
 import actors.*;
+import actors.passQuestionsActor;
 //import actors.UserProfileInsertActorTemp;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.stream.javadsl.StreamConverters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import models.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import play.api.libs.iteratee.Enumerator;
 import play.libs.Akka;
 import play.libs.F;
 import play.mvc.Controller;
@@ -21,6 +24,8 @@ import org.json.simple.JSONObject;
 import views.html.index;
 import akka.actor.*;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,6 +64,10 @@ public class MainController extends Controller {
         actorSystem.actorOf( Props.create( storeChatActor.class ), "storeChatActor");
         actorSystem.actorOf( Props.create( loadChatActor.class ), "loadChatActor");
         actorSystem.actorOf( Props.create( logOutActor.class ), "logoutActor");
+        //actorSystem.actorOf( Props.create( imageStoreActor.class ), "imageStoreActor");
+        actorSystem.actorOf( Props.create( updateProfileImageActor.class ), "imageStoreActor");
+        actorSystem.actorOf( Props.create( loadMoreQuestionsActor.class ), "loadMoreQuestions");
+        actorSystem.actorOf( Props.create( passQuestionsActor.class ), "passQuestion");
 
 
 
@@ -304,6 +313,78 @@ public class MainController extends Controller {
                 .thenApply(response -> ok(response.toString()));
 
     }
+
+    public CompletionStage<Result> postImage(){
+        ActorSelection imageStoreActorInstance =
+                actorSystem.actorSelection( "/user/imageStoreActor" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+
+        return FutureConverters.toJava(ask(imageStoreActorInstance, request().body(),100000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+    public CompletionStage<Result> updateProfilePicture(){
+        ActorSelection imageStoreActorInstance =
+                actorSystem.actorSelection( "/user/imageStoreActor" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+        //InputStream is = getDynamicStreamSomewhere();
+        System.out.println("request is " + request().body().asJson().toString());
+        JsonNode imageDetails = request().body().asJson();
+        JSONObject jobj = new JSONObject();
+        jobj.put("userid", imageDetails.get("userid").toString());
+        jobj.put("image_string",imageDetails.get("image_string").toString());
+
+        return FutureConverters.toJava(ask(imageStoreActorInstance, jobj,10000000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+    public CompletionStage<Result> loadMoreQuestions(){
+        ActorSelection loadMoreQuesActorInstance =
+                actorSystem.actorSelection( "/user/loadMoreQuestions" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+        //InputStream is = getDynamicStreamSomewhere();
+        System.out.println("request is " + request().body().asJson().toString());
+        JsonNode imageDetails = request().body().asJson();
+        JSONObject jobj = new JSONObject();
+        jobj.put("userid", imageDetails.get("userid").toString());
+        //jobj.put("image_string",imageDetails.get("image_string").toString());
+
+        return FutureConverters.toJava(ask(loadMoreQuesActorInstance, jobj,10000000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+    public CompletionStage<Result> passQuestion(){
+        ActorSelection passQuestionsActorInstance =
+                actorSystem.actorSelection( "/user/passQuestion" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+        //InputStream is = getDynamicStreamSomewhere();
+        System.out.println("request is " + request().body().asJson().toString());
+        JsonNode imageDetails = request().body().asJson();
+        JSONObject jobj = new JSONObject();
+        jobj.put("uid_answerer", imageDetails.get("uid_answerer").toString());
+        jobj.put("uid_questioner", imageDetails.get("uid_questioner").toString());
+        jobj.put("qid", imageDetails.get("qid").toString());
+        jobj.put("answer_time", imageDetails.get("answer_time").toString());
+
+        //jobj.put("image_string",imageDetails.get("image_string").toString());
+
+        return FutureConverters.toJava(ask(passQuestionsActorInstance, jobj,10000000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+
 
 
 

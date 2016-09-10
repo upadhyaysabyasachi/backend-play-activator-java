@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   "org.apache.opennlp" % "opennlp-tools" % "1.6.0",
   "org.apache.lucene" % "lucene-snowball" % "3.0.3",
   "org.apache.lucene" % "lucene-analyzers" % "3.4.0",
-  "javax.mail" % "mail" % "1.4.7"
+  "javax.mail" % "mail" % "1.4.7",
+  "com.google.protobuf" % "protobuf-java" % "2.6.1"
 )
 
 
