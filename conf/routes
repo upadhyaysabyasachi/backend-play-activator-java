@@ -17,6 +17,7 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 POST    /postQuestion                           controllers.MainController.postQuestion
 POST    /checkUserIfSaberaUserExists            controllers.MainController.checkIfSaberaUserExists
 POST    /checkUserIfFbUserExists                controllers.MainController.checkUserIfFbUserExists
+POST    /checkRegistration                      controllers.MainController.checkRegistration
 POST    /register                               controllers.MainController.registerNormalUser
 POST    /storeUserProfile                       controllers.MainController.storeCredentials
 POST    /storeDeviceToken                       controllers.MainController.updateDeviceToken
@@ -27,3 +28,4 @@ POST    /logout                                 controllers.MainController.logou
 POST    /updateProfilePicture                   controllers.MainController.updateProfilePicture
 POST    /loadMoreQuestions                      controllers.MainController.loadMoreQuestions
 POST    /passQuestion                           controllers.MainController.passQuestion
+POST    /resendPassCode                         controllers.MainController.resendPassCode

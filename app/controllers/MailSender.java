@@ -29,31 +29,31 @@ public class MailSender {
 
 
             // Recipient's email ID needs to be mentioned.
-            String to = "imeavinash@gmail.com";
+            String to = "sabyasachi.upadhyay4@gmail.com";
 
             // Sender's email ID needs to be mentioned
             String from = "no-reply@gmail.com";
 
             // Assuming you are sending email from localhost
-            String host = "smtp.gmail.com";
+            String host = "localhost";
 
             // Get system properties
             Properties properties = System.getProperties();
 
             // Setup mail serverx
-            properties.put("mail.smtp.host", host);
-            properties.put("mail.smtp.starttls.enable", true);
-            properties.put("mail.smtp.auth",false);
-            properties.put("mail.smtp.port", "25");
+            /*properties.put("mail.smtp.host", host);
+            properties.put("mail.smtp.starttls.enable", "true");
+            properties.put("mail.smtp.auth","false");
+            properties.put("mail.smtp.port", "587");*/
 
             // Get the default Session object.
             Session session = Session.getDefaultInstance(properties);
 
-            SMTPMessage mess = new SMTPMessage(session);
+            /*SMTPMessage mess = new SMTPMessage(session);
             mess.setFrom(new InternetAddress(from));
             mess.addRecipient(Message.RecipientType.TO, new InternetAddress(to));;
             mess.setSubject("Thanks for registering on our website!");
-            mess.setText("Welcome To Job Portal !!!!  Again Thanks ");
+            mess.setText("Welcome To Job Portal !!!!  Again Thanks ");*/
 
 
 
@@ -72,12 +72,8 @@ public class MailSender {
                 // Now set the actual message
                 message.setText("Welcome To Job Portal !!!!  Again Thanks ");
 
-               Transport tr = session.getTransport("smtp");
 
-
-
-                // Send message
-                tr.send(mess);
+               Transport.send(message);
                 System.out.println("Sent message successfully....");
             }catch (MessagingException mex) {
                 mex.printStackTrace();

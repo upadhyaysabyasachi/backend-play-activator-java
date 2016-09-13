@@ -12,6 +12,5 @@ public class NormalUser {
     public NormalUser(String email, String password){
         this.email = email;
         this.password = password;
-
     }
 }

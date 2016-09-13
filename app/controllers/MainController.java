@@ -68,6 +68,8 @@ public class MainController extends Controller {
         actorSystem.actorOf( Props.create( updateProfileImageActor.class ), "imageStoreActor");
         actorSystem.actorOf( Props.create( loadMoreQuestionsActor.class ), "loadMoreQuestions");
         actorSystem.actorOf( Props.create( passQuestionsActor.class ), "passQuestion");
+        actorSystem.actorOf( Props.create( checkRegistrationActor.class ), "checkRegistrationActor");
+        actorSystem.actorOf( Props.create( resendPasscodeActor.class ), "resendPasscodeActor");
 
 
 
@@ -364,7 +366,7 @@ public class MainController extends Controller {
 
     public CompletionStage<Result> passQuestion(){
         ActorSelection passQuestionsActorInstance =
-                actorSystem.actorSelection( "/user/passQuestion" );
+                actorSystem.actorSelection( "/user/checkRegistrationActor" );
 
         //String answer_answerer = questionDetails.get("answer_answerer").toString();
         //String questioner_answerer = questionDetails.get("answer_questioner").toString();
@@ -383,6 +385,45 @@ public class MainController extends Controller {
                 .thenApply(response -> ok(response.toString()));
 
     }
+
+    public CompletionStage<Result> checkRegistration(){
+        ActorSelection checkRegistrationActorInstance =
+                actorSystem.actorSelection( "/user/checkRegistrationActor" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+        //InputStream is = getDynamicStreamSomewhere();
+        System.out.println("request is " + request().body().asJson().toString());
+        JsonNode details = request().body().asJson();
+        String email = details.get("email").toString().substring(1,details.get("email").toString().length()-1);
+
+
+        return FutureConverters.toJava(ask(checkRegistrationActorInstance, email,10000000))
+                .thenApply(response -> ok(response.toString()));
+
+
+
+    }
+
+    public CompletionStage<Result> resendPassCode(){
+
+        ActorSelection checkRegistrationActorInstance =
+                actorSystem.actorSelection( "/user/resendPasscodeActor" );
+
+        //String answer_answerer = questionDetails.get("answer_answerer").toString();
+        //String questioner_answerer = questionDetails.get("answer_questioner").toString();
+        //InputStream is = getDynamicStreamSomewhere();
+        System.out.println("request is " + request().body().asJson().toString());
+        JsonNode details = request().body().asJson();
+        String email = details.get("email").toString().substring(1,details.get("email").toString().length()-1);
+
+
+        return FutureConverters.toJava(ask(checkRegistrationActorInstance, email,10000000))
+                .thenApply(response -> ok(response.toString()));
+
+    }
+
+
 
 
 

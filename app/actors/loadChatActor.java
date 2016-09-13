@@ -25,7 +25,10 @@ public class loadChatActor extends UntypedActor{
     public static String getChatQueryString(ChatObject obj){
 
         return "select cid, uid_receiver,uid_sender, message, time_stamp from conversations where uid_receiver = " + obj.uid_receiver + " and " +
-                "uid_sender = " + obj.uid_sender + " order by time_stamp";
+                "uid_sender = " + obj.uid_sender + "  " +
+                " UNION " +
+                "select cid, uid_receiver,uid_sender, message, time_stamp from conversations where uid_receiver = " + obj.uid_sender + " and " +
+                "uid_sender = " + obj.uid_receiver + " order by time_stamp ";
 
     }
 

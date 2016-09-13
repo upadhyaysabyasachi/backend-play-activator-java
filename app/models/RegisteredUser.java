@@ -11,6 +11,5 @@ public class RegisteredUser {
     public RegisteredUser(String email, String password){
         this.email = email;
         this.password = password;
-
     }
 }
