@@ -40,7 +40,7 @@ public class UserProfileInsertActor  extends UntypedActor {
         //without filters
         JSONArray arr = new JSONArray();
         ResultSet rs = stmt.executeQuery("select qid,userid,qstring,qtype,proposed_answer,proposed_keywords,hints,timer,option1,option2,option3,option4,status1,status2,status3,status4 from questions  " +
-                " where userid <> " + uid + " limit 10");
+                " where userid <> " + uid + " limit 3");
         while(rs.next()){
             JSONObject obj = new JSONObject();
             obj.put("qstring",rs.getString("qstring"));

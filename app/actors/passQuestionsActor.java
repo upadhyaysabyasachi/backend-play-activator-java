@@ -23,7 +23,7 @@ public class passQuestionsActor extends UntypedActor {
                 "                        uid_questioner," +
                 "                        match_status," +
                 "                        answer_time) "+
-                " values("+qid+","+uid_answer+","+uid_questioner+",'passed','"+time+"')";
+                " values("+qid+","+uid_answer+","+uid_questioner+",'passed',"+time+")";
     }
 
 
@@ -32,6 +32,7 @@ public class passQuestionsActor extends UntypedActor {
     @Override
     public void onReceive(Object message) throws Throwable {
         if(message instanceof JSONObject){
+            System.out.println("pass this question");
             JSONObject jobj = (JSONObject)message;
             String uid_answerer = jobj.get("uid_answerer").toString();
             String uid_questioner = jobj.get("uid_questioner").toString();
@@ -44,8 +45,8 @@ public class passQuestionsActor extends UntypedActor {
             try{
                 conn = pool.getConnection();
                 Statement stmt = conn.createStatement();
-                System.out.println("query is " + insertAnswersQueryBuilder(uid_answerer,uid_questioner,qid,time));
-                PreparedStatement ps = conn.prepareStatement(insertAnswersQueryBuilder(uid_answerer,uid_questioner,qid,time),
+                System.out.println("query is " + insertAnswersQueryBuilder(uid_questioner,uid_answerer,qid,time));
+                PreparedStatement ps = conn.prepareStatement(insertAnswersQueryBuilder(uid_questioner,uid_answerer,qid,time),
                         Statement.RETURN_GENERATED_KEYS);
                 int a = ps.executeUpdate(); // do something with the connection.
                 JSONObject jobj1 = new JSONObject();

@@ -366,7 +366,7 @@ public class MainController extends Controller {
 
     public CompletionStage<Result> passQuestion(){
         ActorSelection passQuestionsActorInstance =
-                actorSystem.actorSelection( "/user/checkRegistrationActor" );
+                actorSystem.actorSelection( "/user/passQuestion" );
 
         //String answer_answerer = questionDetails.get("answer_answerer").toString();
         //String questioner_answerer = questionDetails.get("answer_questioner").toString();

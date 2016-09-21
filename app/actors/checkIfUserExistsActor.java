@@ -46,13 +46,20 @@ public class checkIfUserExistsActor extends UntypedActor {
         //without filters
         JSONArray arr = new JSONArray();
         Statement stmt = conn.createStatement();
-        String query = "select ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer," +
-                "option1,option2,option3,option4,status1,status2,status3,status4 from questions ques left outer join answers ans  " +
-                "on ques.qid = ans.qid where ques.userid <> " + uid + " and ans.uid_answerer IS NULL " +
-                "UNION " +
-                "select ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer," +
-                "option1,option2,option3,option4,status1,status2,status3,status4 from questions ques left outer join answers ans  " +
-                "on ques.qid = ans.qid where ques.userid <> 1 and ans.uid_answerer IS NOT NULL and ans.uid_answerer <> " + uid + " limit 3";
+        String query = "select * from (select distinct ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer,"+
+                "option1,option2,option3,option4,status1,status2,status3,status4 from questions ques " +
+                "left outer join answers ans  on ques.qid = ans.qid where ques.userid <> " + uid +" and "+
+        " ans.uid_answerer IS NULL "+
+         "       UNION " +
+        "select ques.qid,ques.userid,ques.qstring,ques.qtype,ques.proposed_answer,ques.proposed_keywords,ques.hints,timer,"+
+         "       option1,option2,option3,option4,status1,status2,status3,status4 "+
+        " from questions ques  join "+
+        "(select distinct ans1.qid from answers ans1"+
+        " left join "+
+        "(select distinct qid from answers where uid_answerer="+uid+")ans2 "+
+        " on ans1.qid = ans2.qid "+
+        " where ans2.qid is null "+
+        ")final on final.qid = ques.qid )a limit 3";
 
         System.out.println("query for getting questions is " + query);
 

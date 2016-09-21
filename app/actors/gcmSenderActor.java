@@ -399,6 +399,7 @@ public class gcmSenderActor extends UntypedActor {
                     }
                     else{
                         //not a match
+                        System.out.println("not a match in objective");
                         String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_answerer.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
                                 "no", answer_time));
 
@@ -507,6 +508,20 @@ public class gcmSenderActor extends UntypedActor {
                         getSender().tell(jobj.toJSONString(),self());
                     }
 
+                }else{
+                    System.out.println("Not a match in subjective");
+                    String status = storeIntoAnswersDB(new Answers(qid,uid_questioner,uid_answerer, answers_questioner.toJSONString(), answers_answerer.toJSONString(),answers_questioner.toJSONString(),
+                            "no", answer_time));
+                    if(status.equalsIgnoreCase("success")){
+                        JSONObject jobj = new JSONObject();
+                        jobj.put("status","success");
+                        getSender().tell(jobj.toJSONString(),self());
+                    }
+                    else{
+                        JSONObject jobj = new JSONObject();
+                        jobj.put("status","failure");
+                        getSender().tell(jobj.toJSONString(),self());
+                    }
                 }
 
             }
